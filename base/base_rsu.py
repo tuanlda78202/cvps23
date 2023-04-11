@@ -2,13 +2,13 @@ import math
 import numpy as np
 import torch 
 import torch.nn as nn 
-from torch.nn import MaxPool2d
+from torch.nn import MaxPool2d, Upsample
 import torch.nn.functional as F 
 
 # Up-sample tensor 'source' to have the same spatial size with tensor 'target'
-def _up_same(source,target):
-    source = F.upsample(source, size=target.shape[2:], mode='bilinear')
-    return source
+def _up_same(x, size):
+    return nn.Upsample(size=size, mode='bilinear', align_corners=False)(x)
+
 
 def _size_map(x, height):
     '''
@@ -18,8 +18,8 @@ def _size_map(x, height):
     size = list(x.shape[-2:])
     
     for h in range(1, height):
-        sizes[h] = size 
-        size = [math.ceil[w/2] for w in size]
+        sizes[h] = size
+        size = [math.ceil(w/2) for w in size]
     
     return sizes    
     
@@ -32,7 +32,7 @@ class RBC(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         
     def forward(self,x):
-        x = self.relu(self.bn(self.conv_s1(x)))
+        x = self.relu(self.bn(self.conv(x)))
         return x
 
 # Residual U-blocks
@@ -72,7 +72,7 @@ class RSU(nn.Module):
         x = self.rbc_in(x)
         
         # U-Net like symmetric encoder-decoder structure
-        def unet(self, x, height=1):
+        def unet(x, height=1):
  
             if height < self.height:
                 x1 = getattr(self, f"rbc{height}")(x)

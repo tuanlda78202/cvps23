@@ -5,9 +5,7 @@ import torch.nn as nn
 from torch.nn import MaxPool2d, Conv2d
 import torch.nn.functional as F
 
-from base import base_rsu
-
-__all__ = ['u2net_full', 'u2net_lite']
+from base.base_rsu import _up_same, _size_map, RBC, RSU
 
 # U2Net 
 class U2Net(nn.Module):
@@ -46,24 +44,41 @@ class U2Net(nn.Module):
     
     def forward(self, x):
         sizes = _size_map(x, self.height)
-        x = self.rbc(x)
+        maps = []  # storage for maps
 
-        # U-Net like symmetric encoder-decoder structure
+        # Side saliency map
         def unet(x, height=1):
-            if height < self.height:
-                x1 = getattr(self, f'rbc{height}')(x)
-                if not self.dilated and height < self.height - 1:
-                    x2 = unet(getattr(self, 'down_sample')(x1), height + 1)
-                else:
-                    x2 = unet(x1, height + 1)
-
-                x = getattr(self, f'rbc{height}d')(torch.cat((x2, x1), 1))
-                return _up_same(x, sizes[height - 1]) if not self.dilated and height > 1 else x
+            if height < 6:
+                x1 = getattr(self, f'stage{height}')(x)
+                
+                x2 = unet(getattr(self, 'down_sample')(x1), height + 1)
+                
+                x = getattr(self, f'stage{height}d')(torch.cat((x2, x1), 1))
+                side(x, height)
+                
+                return _up_same(x, sizes[height - 1]) if height > 1 else x
             else:
-                return getattr(self, f'rbc{height}')(x)
+                x = getattr(self, f'stage{height}')(x)
+                side(x, height)
+                return _up_same(x, sizes[height - 1])
 
-        return x + unet(x)                
+        def side(x, h):
+            # side output saliency map (before sigmoid)
+            x = getattr(self, f'side{h}')(x)
+            x = _up_same(x, sizes[1])
+            maps.append(x)
 
+        def fuse():
+            # fuse saliency probability maps
+            maps.reverse()
+            x = torch.cat(maps, 1)
+            x = getattr(self, 'out_conv')(x)
+            maps.insert(0, x)
+            return [torch.sigmoid(x) for x in maps]
+
+        unet(x)
+        maps = fuse()
+        return maps
 
 # Config for building RSUs and sides
 # {stage : [name, (height(L), in_ch, mid_ch, out_ch, dilated), side]}
@@ -83,7 +98,7 @@ def u2net_full():
         'stage2d': ['De_2', (6, 256, 32, 64), 64],
         'stage1d': ['De_1', (7, 128, 16, 64), 64],
     }
-    return U2Net(config=full, out_ch=1)    
+    return U2Net(config=full, out_channel=1)    
 
 def u2net_lite():
     lite = {
@@ -101,4 +116,4 @@ def u2net_lite():
         'stage2d': ['De_2', (6, 128, 16, 64), 64],
         'stage1d': ['De_1', (7, 128, 16, 64), 64],
     }
-    return U2Net(config=lite, out_ch=1)    
+    return U2Net(config=lite, out_channel=1)    

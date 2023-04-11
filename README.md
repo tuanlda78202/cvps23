@@ -2,8 +2,7 @@
 
 This is the source code for the project "Salient Object Detection for Korean Namecard" of the course "Computer Vision" Summer 2023.
 
-In this project, we will investigate the effect of data augmentation in training GANs
-by experimenting it over a various methods to see whether and how it works.
+In this project, we will investigate the powerful of salient object detection in the real world by experimenting it over a various methods to see whether and how it works with Korean namecard dataset.
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 ordere  dList=false} -->
 
@@ -26,16 +25,14 @@ by experimenting it over a various methods to see whether and how it works.
 cvp/
 │
 ├── train.py - main script to start training
-├── eval.py - script to compute FID score on each saved checkpoint of a specified model
+├── eval.py - script to compute evaluation score on each saved checkpoint of a specified model
 │
 ├── parse_config.py - class to handle config file and cli options
 │
-├── augment/ - implementation of data augmentation methods
-│
 ├── base/ - abstract base classes
 │   ├── base_data_loader.py
-│   ├── base_gan.py
-│   └── base_gan_trainer.py
+│   ├── base_rsu.py
+│   └── base_trainer.py
 │
 ├── configs/ - all training config files go here
 │
@@ -75,6 +72,7 @@ Install the required packages:
 
 ```
 pip install -r requirements.txt
+export PYTHONPATH="${PYTHONPATH}:/CVP"
 ```
 
 Choose a config file from `configs/` and run:

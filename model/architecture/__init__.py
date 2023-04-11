@@ -1,2 +1,2 @@
 from .u2net import *
-from .isnet import * 
+from .isnet import *
