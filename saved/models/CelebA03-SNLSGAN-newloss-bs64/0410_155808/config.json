@@ -1,0 +1,86 @@
+{
+    "name": "CelebA03-SNLSGAN-newloss-bs64",
+    "n_gpu": 1,
+    "arch": {
+        "type": "SNGAN64",
+        "args": {
+            "latent_dim": 128
+        }
+    },
+    "data_loader": {
+        "type": "KNCDataLoader",
+        "args": {
+            "data_dir": "data/name-card",
+            "batch_size": 64,
+            "shuffle": true,
+            "num_workers": 1,
+            "train_portion": 0.8
+        }
+    },
+    "optimizer_G": {
+        "type": "Adam",
+        "args": {
+            "lr": 0.0002,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "betas": [
+                0.5,
+                0.999
+            ]
+        }
+    },
+    "optimizer_D": {
+        "type": "Adam",
+        "args": {
+            "lr": 0.0002,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "betas": [
+                0.5,
+                0.999
+            ]
+        }
+    },
+    "loss": "leastsquare_loss",
+    "metrics": [],
+    "lr_scheduler_G": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 1,
+            "gamma": 0.99
+        }
+    },
+    "lr_scheduler_D": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 1,
+            "gamma": 0.99
+        }
+    },
+    "trainer": {
+        "type": "LSGANTrainer",
+        "epochs": 50,
+        "a": -1,
+        "b": 1,
+        "c": 0,
+        "save_dir": "saved/",
+        "save_period": 5,
+        "verbosity": 1,
+        "visual_tool": "wandb",
+        "__comment_1.1": "torch.utils.tensorboard",
+        "__comment_1.2": "tensorboardX",
+        "__comment_1.3": "wandb",
+        "__comment_1.4": "None",
+        "api_key_file": "./init/wandb-api-key-file",
+        "project": "gan-ada",
+        "entity": "gan-augment-project",
+        "name": "test_1",
+        "__comment_2.1": "Set name for one running"
+    },
+    "eval": {
+        "save_dir": "saved/generated",
+        "n_sample": 50000,
+        "batch_size": 32
+    },
+    "augment": {}
+}

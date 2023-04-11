@@ -1,5 +1,8 @@
-torch>=1.1
+torch
 torchvision
 numpy
 tqdm
-tensorboard>=1.14
+paddle
+paddlehub
+gradio
+opencv
