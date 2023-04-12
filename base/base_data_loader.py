@@ -1,6 +1,5 @@
 import numpy as np
 from torch.utils.data import DataLoader
-from torch.utils.data.dataloader import default_collate
 from torch.utils.data.sampler import SubsetRandomSampler
 
 # Generating next batch
@@ -11,7 +10,7 @@ class BaseDataLoader(DataLoader):
     """
     Base class for all data loaders
     """
-    def __init__(self, dataset, batch_size, shuffle, validation_split, num_workers, collate_fn=default_collate):
+    def __init__(self, dataset, batch_size, shuffle, validation_split, num_workers):
         self.validation_split = validation_split
         self.shuffle = shuffle
 
@@ -24,11 +23,10 @@ class BaseDataLoader(DataLoader):
             'dataset': dataset,
             'batch_size': batch_size,
             'shuffle': self.shuffle,
-            'collate_fn': collate_fn,
             'num_workers': num_workers
         }
         super().__init__(sampler=self.sampler, **self.init_kwargs)
-
+    
     def _split_sampler(self, split):
         if split == 0.0:
             return None, None

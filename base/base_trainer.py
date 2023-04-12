@@ -18,7 +18,8 @@ class BaseTrainer:
     """
     Base class for all trainers
     """
-    def __init__(self, model, criterion, metric_ftns, optimizer, config):
+    def __init__(self, model, criterion, metric_ftns, optimizer, config,
+                 data_loader, lr_scheduler=None, len_epoch=None):
         self.config = config
         self.logger = config.get_logger('trainer', config['trainer']['verbosity'])
 

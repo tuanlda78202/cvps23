@@ -8,9 +8,8 @@
     },
 
     "data_loader": {
-      "type": "KNCDataLoader",
+      "type": "KNC_DataLoader",
       "args": {
-        "data_dir": "data",
         "batch_size": 8,
         "shuffle": true,
         "num_workers": 1,

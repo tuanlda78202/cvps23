@@ -1,3 +1,4 @@
+# export PYTHONPATH="${PYTHONPATH}:/CVP"
 # pipreqs for get requirements.txt
 gradio==3.25.0
 numpy==1.23.5
@@ -8,3 +9,4 @@ skimage==0.0
 torch==1.13.1
 torchvision==0.14.1
 tqdm==4.64.1
+wandb==0.13.6

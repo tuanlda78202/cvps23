@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torch.nn import MaxPool2d, Conv2d
 import torch.nn.functional as F
-from torchsummary import summary
+#from torchsummary import summary
 
 from base.base_rsu import _up_same, _size_map, RSU
 

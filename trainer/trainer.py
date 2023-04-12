@@ -9,10 +9,10 @@ class Trainer(BaseTrainer):
     """
     Trainer class
     """
-    def __init__(self, model, criterion, metric_ftns, optimizer, config, 
+    def __init__(self, model, criterion, metric_ftns, optimizer, config,
                  device, data_loader, valid_data_loader=None, lr_scheduler=None, len_epoch=None):
         
-        super().__init__(model, criterion, metric_ftns, optimizer, config)
+        super().__init__(model, criterion, metric_ftns, optimizer, config, data_loader)
         self.config = config
         self.device = device
         self.data_loader = data_loader
@@ -112,3 +112,5 @@ class Trainer(BaseTrainer):
             current = batch_idx
             total = self.len_epoch
         return base.format(current, total, 100.0 * current / total)
+
+

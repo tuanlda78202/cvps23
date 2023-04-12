@@ -97,7 +97,7 @@ Config files are in `.json` format:
     },
 
     "data_loader": {
-      "type": "KNCDataLoader",
+      "type": "KNC_DataLoader",
       "args": {
         "data_dir": "data",
         "batch_size": 8,

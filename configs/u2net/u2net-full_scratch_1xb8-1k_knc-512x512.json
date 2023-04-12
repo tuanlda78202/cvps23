@@ -8,13 +8,14 @@
     },
 
     "data_loader": {
-      "type": "KNCDataLoader",
+      "type": "KNC_DataLoader",
       "args": {
-        "data_dir": "data",
         "batch_size": 8,
         "shuffle": true,
         "num_workers": 1,
-        "validation_split": 0.1
+        "validation_split": 0.1,
+        "output_size": 320,
+        "crop_size": 288
       }
     },
   
@@ -53,6 +54,7 @@
       "save_period": 5,
       "verbosity": 1,
   
+      "tensorboard": false,
       "visual_tool": "wandb",
       "__comment_1.1": "torch.utils.tensorboard",
       "__comment_1.2": "tensorboardX",

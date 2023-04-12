@@ -7,7 +7,8 @@ import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.architecture as module_arch
-
+import os 
+import glob
 from parse_config import ConfigParser
 from trainer import Trainer
 from utils import prepare_device
@@ -21,10 +22,38 @@ torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 
 def main(config):
+    # Images & Masks List
+    data_dir = os.path.join(os.getcwd(), 'data' + os.sep)
+    img_dir = os.path.join("images" + os.sep)
+    mask_dir = os.path.join("masks" + os.sep)
+    
+    img_ext, mask_ext = ".jpg", ".png"
+    
+    img_list = glob.glob(data_dir + img_dir + "*" + img_ext)
+    mask_list = []
+    
+    for img_path in img_list:
+        full_name = img_path.split(os.sep)[-1]
+        
+        name_ext = full_name.split(".")
+        name_list = name_ext[0:-1]
+        img_idx = name_list[0]
+        
+        for i in range(1, len(name_list)):
+            img_idx = img_idx + "." + name_list[i]
+        
+        mask_list.append(data_dir + img_dir + img_idx + img_ext)
+        
+    print("-----------------------------------")
+    print("Number of images: ", len(img_list))
+    print("Number of masks: ", len(mask_list))
+    print("-----------------------------------")
+    
+    # Logging
     logger = config.get_logger('train')
 
     # Data Loader 
-    data_loader = config.init_obj('data_loader', module_data)
+    data_loader = config.init_obj('data_loader', module_data, img_list=img_list, mask_list=mask_list)
     valid_data_loader = data_loader.split_validation()
 
     # Model architecture
@@ -39,7 +68,7 @@ def main(config):
     criterion = getattr(module_loss, config['loss'])
     metrics = [getattr(module_metric, met) for met in config['metrics']]
 
-    # Optimizer, LR scheduler
+    # Optimizer & LR scheduler
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = config.init_obj('optimizer', torch.optim, trainable_params)
     lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
@@ -58,7 +87,7 @@ def main(config):
 if __name__ == '__main__':
     
     args = argparse.ArgumentParser(description='Salient Object Detection')
-    args.add_argument('-c', '--config', default=None, type=str,
+    args.add_argument('-c', '--config', default="configs/u2net/u2net-full_scratch_1xb8-1k_knc-512x512.json", type=str,
                       help='config file path (default: None)')
     args.add_argument('-r', '--resume', default=None, type=str,
                       help='path to latest checkpoint (default: None)')
@@ -68,7 +97,8 @@ if __name__ == '__main__':
     # Custom CLI options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
     options = [
-        CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader;args;batch_size')
+        CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader;args;batch_size'),
+        CustomArgs(["--ep", "--epochs"], type=int, target="trainer; epochs")
     ]
     
     config = ConfigParser.from_args(args, options)

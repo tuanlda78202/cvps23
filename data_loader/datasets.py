@@ -6,17 +6,17 @@ from skimage import io, transform, color
 import numpy as np 
 import torch
 from torch.utils.data import Dataset
-data_dir = os.path.join(os.getcwd(), 'data' + os.sep)
-print(data_dir)
+
 # Korean Name Card Datasets
 class KNC_Dataset(Dataset):
     def __init__(self, img_list, mask_list, transform):
         self.img_list = img_list
         self.mask_list = mask_list
+        self.len = len(self.img_list)
         self.transform = transform
         
     def __len__(self):
-        return self.img_list
+        return self.len
     
     def __getitem__(self, idx):
         img = io.imread(self.img_list[idx])
@@ -44,12 +44,13 @@ class KNC_Dataset(Dataset):
         elif len(img.shape)==2 and len(mask.shape)==2:
             img = img[:, :, np.newaxis]
             mask = mask[:, :, np.newaxis]
-
+        
+        sample = {'img_idx':img_idx, 'img':img, 'mask':mask}
         # Transform
         if self.transform:
             sample = self.transform(sample)
 
-        return {'img_idx':img_idx, 'img':img, 'mask':mask}
+        return sample
     
 class Rescale(object):
 	'''
@@ -102,17 +103,17 @@ class RandomCrop(object):
 		img_idx, img, mask = sample['img_idx'], sample['img'],sample['mask']
 
 		if random.random() >= 0.5:
-			image, mask = image[::-1], mask[::-1]
+			img, mask = img[::-1], mask[::-1]
 
-		h, w = image.shape[:2]
+		h, w = img.shape[:2]
 		new_h, new_w = self.output_size
 
-		# Random range 
+		# Random range
 		top = np.random.randint(0, h - new_h)
 		left = np.random.randint(0, w - new_w)
 
-  		# Crop 		
-		img = image[top: top + new_h, left: left + new_w]
+		# Crop 		
+		img = img[top: top + new_h, left: left + new_w]
 		mask = mask[top: top + new_h, left: left + new_w]
 
 		return {'img_idx':img_idx, 'img':img, 'mask':mask}
