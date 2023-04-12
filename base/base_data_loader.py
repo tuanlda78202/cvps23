@@ -10,7 +10,7 @@ class BaseDataLoader(DataLoader):
     """
     Base class for all data loaders
     """
-    def __init__(self, dataset, batch_size, shuffle, validation_split, num_workers):
+    def __init__(self, dataset, batch_size, shuffle, validation_split, num_workers=1):
         self.validation_split = validation_split
         self.shuffle = shuffle
 
@@ -26,7 +26,7 @@ class BaseDataLoader(DataLoader):
             'num_workers': num_workers
         }
         super().__init__(sampler=self.sampler, **self.init_kwargs)
-    
+
     def _split_sampler(self, split):
         if split == 0.0:
             return None, None

@@ -1,6 +1,4 @@
 from __future__ import print_function, division
-import glob
-import os 
 import random
 from skimage import io, transform, color
 import numpy as np 
@@ -20,7 +18,6 @@ class KNC_Dataset(Dataset):
     
     def __getitem__(self, idx):
         img = io.imread(self.img_list[idx])
-        img_name = self.img_list[idx]
         img_idx = np.array([idx])
 
         # Iter mask list
@@ -32,9 +29,9 @@ class KNC_Dataset(Dataset):
         mask = np.zeros(mask_rbg.shape[0:2])
         
         # Check Mask 3 channels
-        if len(mask_rbg.shape) ==3:
+        if len(mask_rbg.shape) == 3:
             mask = mask_rbg[:,:,0]
-        elif len(mask_rbg.shape) ==2:
+        elif len(mask_rbg.shape) == 2:
             mask = mask_rbg
 
         # Assure img & mask has 3 channels 
@@ -46,10 +43,11 @@ class KNC_Dataset(Dataset):
             mask = mask[:, :, np.newaxis]
         
         sample = {'img_idx':img_idx, 'img':img, 'mask':mask}
+        
         # Transform
         if self.transform:
             sample = self.transform(sample)
-
+        print(sample["img_idx"])
         return sample
     
 class Rescale(object):
@@ -205,4 +203,4 @@ class ToTensorLab(object):
 
 		tmpImg = tmpImg.transpose((2, 0, 1))
 
-		return {'img_idx':torch.from_numpy(img_idx), 'img': torch.from_numpy(tmpImg), 'label': torch.from_numpy(tmpMask)}
+		return {'img_idx':torch.from_numpy(img_idx), 'img': torch.from_numpy(tmpImg), 'mask': torch.from_numpy(tmpMask)}

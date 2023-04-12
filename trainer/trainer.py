@@ -43,12 +43,16 @@ class Trainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
         
-        for batch_idx, (data, target) in enumerate(self.data_loader):
-            data, target = data.to(self.device), target.to(self.device)
+        for batch_idx, loader in enumerate(self.data_loader):            
+            
+            data, target = loader["img"], loader["mask"]
 
+            data = data.type(torch.FloatTensor)
+            target = target.type(torch.FloatTensor)
+            
             self.optimizer.zero_grad()
             output = self.model(data)
-            loss = self.criterion(output, target)
+            loss2, loss = self.criterion(output, target)
             loss.backward()
             self.optimizer.step()
 
@@ -58,10 +62,9 @@ class Trainer(BaseTrainer):
                 self.train_metrics.update(met.__name__, met(output, target))
 
             if batch_idx % self.log_step == 0:
-                self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(
-                    epoch,
-                    self._progress(batch_idx),
-                    loss.item()))
+                self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(epoch,
+                                                                           self._progress(batch_idx),
+                                                                           loss.item()))
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
             if batch_idx == self.len_epoch:

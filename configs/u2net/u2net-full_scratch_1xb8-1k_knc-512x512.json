@@ -33,7 +33,7 @@
     "loss": "multi_bce_fusion",
 
 
-    "metrics": ["accuracy", "top_k_acc"],
+    "metrics": ["pixel_accuracy", "dice", "precision", "recall"],
 
 
     "lr_scheduler": {

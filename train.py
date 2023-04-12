@@ -2,10 +2,9 @@ import argparse
 import collections
 import torch
 import numpy as np
-
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
-import model.metric as module_metric
+from model import SegmentationMetrics as module_metric
 import model.architecture as module_arch
 import os 
 import glob
@@ -21,47 +20,24 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 
+
 def main(config):
-    # Images & Masks List
-    data_dir = os.path.join(os.getcwd(), 'data' + os.sep)
-    img_dir = os.path.join("images" + os.sep)
-    mask_dir = os.path.join("masks" + os.sep)
-    
-    img_ext, mask_ext = ".jpg", ".png"
-    
-    img_list = glob.glob(data_dir + img_dir + "*" + img_ext)
-    mask_list = []
-    
-    for img_path in img_list:
-        full_name = img_path.split(os.sep)[-1]
-        
-        name_ext = full_name.split(".")
-        name_list = name_ext[0:-1]
-        img_idx = name_list[0]
-        
-        for i in range(1, len(name_list)):
-            img_idx = img_idx + "." + name_list[i]
-        
-        mask_list.append(data_dir + img_dir + img_idx + img_ext)
-        
-    print("-----------------------------------")
-    print("Number of images: ", len(img_list))
-    print("Number of masks: ", len(mask_list))
-    print("-----------------------------------")
-    
     # Logging
     logger = config.get_logger('train')
 
     # Data Loader 
-    data_loader = config.init_obj('data_loader', module_data, img_list=img_list, mask_list=mask_list)
+    data_loader = config.init_obj('data_loader', module_data)
     valid_data_loader = data_loader.split_validation()
 
+    print(valid_data_loader)
+    
     # Model architecture
     model = config.init_obj('arch', module_arch)
     logger.info(model)
 
     # Device GPU training
     device = "mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = "cpu"
     model = model.to(device)
 
     # Loss & Metrics
@@ -91,15 +67,16 @@ if __name__ == '__main__':
                       help='config file path (default: None)')
     args.add_argument('-r', '--resume', default=None, type=str,
                       help='path to latest checkpoint (default: None)')
-    args.add_argument('-d', '--device', default=None, type=str,
+    args.add_argument('-d', '--device', default="mps", type=str,
                       help='indices of GPUs to enable (default: all)')
 
     # Custom CLI options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
     options = [
-        CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader;args;batch_size'),
+        CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader; args; batch_size'),
         CustomArgs(["--ep", "--epochs"], type=int, target="trainer; epochs")
     ]
     
     config = ConfigParser.from_args(args, options)
+    
     main(config)

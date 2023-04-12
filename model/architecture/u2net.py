@@ -1,5 +1,5 @@
 import math
-
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import MaxPool2d, Conv2d
@@ -10,7 +10,7 @@ from base.base_rsu import _up_same, _size_map, RSU
 
 # U2Net 
 class U2Net(nn.Module):
-    def __init__(self, config, out_channel) -> None:
+    def __init__(self, config, out_channel):
         super().__init__()
         self.out_channel = out_channel
         self._make_layers(config)
