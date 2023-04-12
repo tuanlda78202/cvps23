@@ -1,5 +1,5 @@
 {
-    "name": "U2NetFull_KNC_b64",
+    "name": "U2NetFull_Scratch_1gpu-bs8_KNC_size512",
     "n_gpu": 1,
   
     "arch": {

@@ -26,12 +26,11 @@ outputs = [
            ]
 
 title = "U^2-Net"
-description = "demo for U^2-Net. To use it, simply upload your image, or click one of the examples to load them. Read more at the links below."
-article = "<p style='text-align: center'><a href='https://arxiv.org/abs/2005.09007'>U^2-Net: Going Deeper with Nested U-Structure for Salient Object Detection</a> | <a href='https://github.com/xuebinqin/U-2-Net'>Github Repo</a></p>"
+description = "Demo for U^2-Net. To use it, simply upload your image, or click one of the examples to load them. Read more at the links below."
 
 examples = [
   ['fox.jpg'],
   ['parrot.jpg']
 ]
 
-gr.Interface(infer, inputs, outputs, title=title, description=description, article=article, examples=examples).launch()
+gr.Interface(infer, inputs, outputs, title=title, description=description, examples=examples).launch()
