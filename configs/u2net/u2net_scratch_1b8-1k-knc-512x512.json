@@ -28,9 +28,12 @@
       }
     },
 
-    "loss": "muti_bce_loss_fusion_u2net",
+    
+    "loss": "multi_bce_fusion",
+
 
     "metrics": ["accuracy", "top_k_acc"],
+
 
     "lr_scheduler": {
       "type": "StepLR",
@@ -42,13 +45,10 @@
 
 
     "trainer": {
-      "type": "LSGANTrainer",
+      "type": "Trainer",
   
       "epochs": 50,
-      "a": -1,
-      "b": 1,
-      "c": 0,
-        
+
       "save_dir": "saved/",
       "save_period": 5,
       "verbosity": 1,
@@ -65,12 +65,10 @@
       "__comment_2.1": "Set name for one running"
     },
 
-    "eval": {
-      "save_dir": "saved/generated",
-      "n_sample": 50000,
-      "batch_size": 32
-    },
 
-    "augment": {
+    "test": {
+      "save_dir": "saved/generated",
+      "n_sample": 2000,
+      "batch_size": 32
     }
-  }
+}

@@ -7,7 +7,7 @@ def nll_loss(output, target):
 # U2Net 
 bce_loss = nn.BCELoss(size_average=True)
 
-def muti_bce_loss_fusion_u2net(d0, d1, d2, d3, d4, d5, d6, labels_v):
+def multi_bce_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 
 	loss0 = bce_loss(d0,labels_v)
 	loss1 = bce_loss(d1,labels_v)
