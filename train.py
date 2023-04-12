@@ -2,10 +2,12 @@ import argparse
 import collections
 import torch
 import numpy as np
+
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
-import model.model as module_arch
+import model.architecture as module_arch
+
 from parse_config import ConfigParser
 from trainer import Trainer
 from utils import prepare_device
@@ -21,7 +23,7 @@ np.random.seed(SEED)
 def main(config):
     logger = config.get_logger('train')
 
-    # Data_Loader 
+    # Data Loader 
     data_loader = config.init_obj('data_loader', module_data)
     valid_data_loader = data_loader.split_validation()
 
@@ -29,11 +31,9 @@ def main(config):
     model = config.init_obj('arch', module_arch)
     logger.info(model)
 
-    # (Multi-device) GPU training
-    device, device_ids = prepare_device(config['n_gpu'])
+    # Device GPU training
+    device = "mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
-    if len(device_ids) > 1:
-        model = torch.nn.DataParallel(model, device_ids=device_ids)
 
     # Loss & Metrics
     criterion = getattr(module_loss, config['loss'])
@@ -65,11 +65,11 @@ if __name__ == '__main__':
     args.add_argument('-d', '--device', default=None, type=str,
                       help='indices of GPUs to enable (default: all)')
 
-    # custom cli options to modify configuration from default values given in json file.
+    # Custom CLI options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
     options = [
-        CustomArgs(['--lr', '--learning_rate'], type=float, target='optimizer;args;lr'),
         CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader;args;batch_size')
     ]
+    
     config = ConfigParser.from_args(args, options)
     main(config)

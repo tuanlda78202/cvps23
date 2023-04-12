@@ -1,8 +1,10 @@
-torch
-torchvision
-numpy
-tqdm
-paddle
-paddlehub
-gradio
-opencv
+# pipreqs for get requirements.txt
+gradio==3.25.0
+numpy==1.23.5
+opencv_python==4.7.0.72
+paddlehub==1.8.0
+pandas==1.5.2
+skimage==0.0
+torch==1.13.1
+torchvision==0.14.1
+tqdm==4.64.1

@@ -4,8 +4,9 @@ import torch
 import torch.nn as nn
 from torch.nn import MaxPool2d, Conv2d
 import torch.nn.functional as F
+from torchsummary import summary
 
-from base.base_rsu import _up_same, _size_map, RBC, RSU
+from base.base_rsu import _up_same, _size_map, RSU
 
 # U2Net 
 class U2Net(nn.Module):
@@ -37,8 +38,7 @@ class U2Net(nn.Module):
             
             # Side Layer
             if value[2] > 0:
-                self.add_module(f"side{value[0][-1]}", Conv2d(value[2], self.out_channel,
-                                                          kernel_size=3, padding=1))
+                self.add_module(f"side{value[0][-1]}", Conv2d(value[2], self.out_channel, kernel_size=3, padding=1))
         # Fuse Layer
         self.add_module("out_conv", Conv2d(int(self.height * self.out_channel), self.out_channel, kernel_size=1))
     
@@ -117,3 +117,6 @@ def u2net_lite():
         'stage1d': ['De_1', (7, 128, 16, 64), 64],
     }
     return U2Net(config=lite, out_channel=1)    
+
+# Model parameters
+# print(summary(u2net_full(), input_size = (3, 320, 320)))
