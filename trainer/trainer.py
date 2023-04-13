@@ -25,7 +25,7 @@ class Trainer(BaseTrainer):
             # iteration-based training
             self.data_loader = inf_loop(data_loader)
             self.len_epoch = len_epoch
-            
+        
         self.valid_data_loader = valid_data_loader
         self.do_validation = self.valid_data_loader is not None
         self.lr_scheduler = lr_scheduler
@@ -42,8 +42,11 @@ class Trainer(BaseTrainer):
         :param epoch: Integer, current training epoch.
         :return: A log that contains average loss and metric in this epoch.
         """
-        tqdm_batch = tqdm(self.data_loader, total=len(self.data_loader),
-                          desc="Epoch {}:".format(epoch))
+        tqdm_batch = tqdm(iterable=self.data_loader, 
+                          desc="Epoch {}".format(epoch),
+                          total=len(self.data_loader),
+                          unit="it")
+
         self.model.train()
         self.train_metrics.reset()
         

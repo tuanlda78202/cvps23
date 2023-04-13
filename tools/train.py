@@ -13,7 +13,7 @@ from trainer import Trainer
 from utils import prepare_device
 
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.filterwarnings("ignore")
 
 # fix random seeds for reproducibility
 SEED = 42
@@ -74,8 +74,8 @@ if __name__ == '__main__':
     # Custom CLI options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
     options = [
-        CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader; args; batch_size'),
-        CustomArgs(["--ep", "--epochs"], type=int, target="trainer; epochs")
+        CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader;args;batch_size'),
+        CustomArgs(["--ep", "--epochs"], type=int, target="trainer;epochs")
     ]
     
     config = ConfigParser.from_args(args, options)
