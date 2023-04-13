@@ -7,7 +7,7 @@ import numpy as np
 
 # Device agnostics
 device = "mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu")
-device = "cpu"
+#device = "cpu"
 
 def summary(model, input_size, batch_size=-1, device=torch.device(device), dtypes=None):
     result, params_info = summary_string(
