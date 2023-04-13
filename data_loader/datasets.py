@@ -47,7 +47,7 @@ class KNC_Dataset(Dataset):
         # Transform
         if self.transform:
             sample = self.transform(sample)
-        print(sample["img_idx"])
+
         return sample
     
 class Rescale(object):

@@ -47,14 +47,16 @@ class SegmentationMetrics(object):
         y_pred: :math:`(N, C, H, W)`, torch tensor.
 
     Examples::
-        >>> metric_calculator = SegmentationMetrics(average=True, ignore_background=True)
+        >>> metric_calculator = SegmentationMetrics()
         >>> pixel_accuracy, dice, precision, recall = metric_calculator(y_true, y_pred)
     """
-    def __init__(self, eps=1e-5, average=True, ignore_background=True, activation='0-1'):
+    def __init__(self, eps=1e-5, average=True, ignore_background=True, activation='0-1',
+                 y_true=None, y_pred=None):
         self.eps = eps
         self.average = average
         self.ignore = ignore_background
         self.activation = activation
+    
 
     @staticmethod
     def _one_hot(gt, pred, class_num):
@@ -113,7 +115,7 @@ class SegmentationMetrics(object):
         return pixel_acc, dice, precision, recall
 
     def __call__(self, y_true, y_pred):
-        class_num = y_pred.size(1)
+        class_num = 2
 
         if self.activation in [None, 'none']:
             activation_fn = lambda x: x
@@ -184,3 +186,27 @@ class BinaryMetrics():
                                                                                                     dtype=torch.float),
                                                                                           activated_pred)
         return [pixel_acc, dice, precision, specificity, recall]
+
+def pixel_accuracy(y_true, y_pred):
+    metric_calculator = SegmentationMetrics()
+    
+    pixel_accuracy, dice, precision, recall = metric_calculator(y_true, y_pred)
+    return pixel_accuracy
+
+def dice(y_true, y_pred):
+    metric_calculator = SegmentationMetrics()
+    
+    pixel_accuracy, dice, precision, recall = metric_calculator(y_true, y_pred)
+    return dice
+
+def precision(y_true, y_pred):
+    metric_calculator = SegmentationMetrics()
+    
+    pixel_accuracy, dice, precision, recall = metric_calculator(y_true, y_pred)
+    return precision
+
+def recall(y_true, y_pred):
+    metric_calculator = SegmentationMetrics()
+    
+    pixel_accuracy, dice, precision, recall = metric_calculator(y_true, y_pred)
+    return recall

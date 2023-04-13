@@ -29,7 +29,8 @@ class Trainer(BaseTrainer):
         self.do_validation = self.valid_data_loader is not None
         self.lr_scheduler = lr_scheduler
         self.log_step = int(np.sqrt(data_loader.batch_size))
-
+        
+        # DataFrame metrics 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
 
@@ -45,21 +46,25 @@ class Trainer(BaseTrainer):
         
         for batch_idx, loader in enumerate(self.data_loader):            
             
-            data, target = loader["img"], loader["mask"]
+            data, mask = loader["img"], loader["mask"]
 
             data = data.type(torch.FloatTensor)
-            target = target.type(torch.FloatTensor)
+            mask = mask.type(torch.FloatTensor)
             
             self.optimizer.zero_grad()
-            output = self.model(data)
-            loss2, loss = self.criterion(output, target)
+            
+            # x_map for metrics, list_maps for loss 
+            x_map, list_maps = self.model(data)
+                
+            loss0, loss = self.criterion(list_maps, mask)            
             loss.backward()
             self.optimizer.step()
 
             self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
             self.train_metrics.update('loss', loss.item())
+            
             for met in self.metric_ftns:
-                self.train_metrics.update(met.__name__, met(output, target))
+                self.train_metrics.update(met.__name__, met(mask, x_map))
 
             if batch_idx % self.log_step == 0:
                 self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(epoch,
@@ -69,6 +74,7 @@ class Trainer(BaseTrainer):
 
             if batch_idx == self.len_epoch:
                 break
+                        
         log = self.train_metrics.result()
 
         if self.do_validation:
@@ -89,19 +95,19 @@ class Trainer(BaseTrainer):
         self.model.eval()
         self.valid_metrics.reset()
         with torch.no_grad():
-            for batch_idx, (data, target) in enumerate(self.valid_data_loader):
-                data, target = data.to(self.device), target.to(self.device)
+            for batch_idx, (data, mask) in enumerate(self.valid_data_loader):
+                data, mask = data.to(self.device), mask.to(self.device)
 
                 output = self.model(data)
-                loss = self.criterion(output, target)
+                loss = self.criterion(output, mask)
 
                 self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
                 self.valid_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
-                    self.valid_metrics.update(met.__name__, met(output, target))
+                    self.valid_metrics.update(met.__name__, met(output, mask))
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
-        # add histogram of model parameters to the tensorboard
+        # Add histogram of model parameters to the Tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins='auto')
         return self.valid_metrics.result()

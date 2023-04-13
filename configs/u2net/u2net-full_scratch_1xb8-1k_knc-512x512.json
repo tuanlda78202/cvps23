@@ -1,5 +1,5 @@
 {
-    "name": "U2NetFull_Scratch_1gpu-bs8_KNC_size512",
+    "name": "U2NetFull_scratch_1gpu-bs8_KNC_size512",
     "n_gpu": 1,
   
     "arch": {
@@ -33,7 +33,9 @@
     "loss": "multi_bce_fusion",
 
 
-    "metrics": ["pixel_accuracy", "dice", "precision", "recall"],
+    "metrics": [
+      "pixel_accuracy", "dice", "precision", "recall"
+    ],
 
 
     "lr_scheduler": {
