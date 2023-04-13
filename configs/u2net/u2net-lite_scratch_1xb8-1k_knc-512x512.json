@@ -10,7 +10,7 @@
   "data_loader": {
     "type": "KNC_DataLoader",
     "args": {
-      "batch_size": 8,
+      "batch_size": 2,
       "shuffle": true,
       "num_workers": 1,
       "validation_split": 0.1,

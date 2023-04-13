@@ -3,7 +3,7 @@ import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
 from utils import inf_loop, MetricTracker
-
+from tqdm import tqdm
 
 class Trainer(BaseTrainer):
     """
@@ -44,42 +44,46 @@ class Trainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
         
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        
-        for batch_idx, loader in enumerate(self.data_loader):            
-            
-            data, mask = loader["img"], loader["mask"]
+        with tqdm(self.data_loader, total= len(self.data_loader),unit="batch") as tepoch:
+            for batch_idx, loader in enumerate(self.data_loader):   
+                         
+                tepoch.set_description(f"Epoch {epoch}")
+                # Load to Device 
+                data, mask = loader["img"].to(self.device), loader["mask"].to(self.device)
 
-            if device == "cuda":
-                data = data.type(torch.cuda.FloatTensor)
-                mask = mask.type(torch.cuda.FloatTensor)
-            else:
-                data = data.type(torch.FloatTensor)
-                mask = mask.type(torch.FloatTensor)
-            
-            self.optimizer.zero_grad()
-            
-            # x_map for metrics, list_maps for loss 
-            x_map, list_maps = self.model(data)
+                if self.device == "cuda":
+                    data = data.type(torch.cuda.FloatTensor)
+                    mask = mask.type(torch.cuda.FloatTensor)
+                else:
+                    data = data.type(torch.FloatTensor)
+                    mask = mask.type(torch.FloatTensor)
                 
-            loss0, loss = self.criterion(list_maps, mask)            
-            loss.backward()
-            self.optimizer.step()
+                self.optimizer.zero_grad()
+                
+                # x_map for metrics, list_maps for loss 
+                x_map, list_maps = self.model(data)
+                    
+                loss0, loss = self.criterion(list_maps, mask)            
+                loss.backward()
+                self.optimizer.step()
 
-            self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
-            self.train_metrics.update('loss', loss.item())
-            
-            for met in self.metric_ftns:
-                self.train_metrics.update(met.__name__, met(mask, x_map))
+                self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
+                self.train_metrics.update('loss', loss.item())
+                
+                for met in self.metric_ftns:
+                    self.train_metrics.update(met.__name__, met(mask, x_map))
+                    
+                # Progress bar
+                tepoch.set_postfix(loss=loss.item())
 
-            if batch_idx % self.log_step == 0:
-                self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(epoch,
-                                                                           self._progress(batch_idx),
-                                                                           loss.item()))
-                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
-
-            if batch_idx == self.len_epoch:
-                break
+                if batch_idx % self.log_step == 0:
+                    self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(epoch,
+                                                                            self._progress(batch_idx),
+                                                                            loss.item()))
+                    self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+                
+                if batch_idx == self.len_epoch:
+                    break
                         
         log = self.train_metrics.result()
 
@@ -101,16 +105,16 @@ class Trainer(BaseTrainer):
         self.model.eval()
         self.valid_metrics.reset()
         with torch.no_grad():
-            for batch_idx, (data, mask) in enumerate(self.valid_data_loader):
-                data, mask = data.to(self.device), mask.to(self.device)
-
-                output = self.model(data)
-                loss = self.criterion(output, mask)
+            for batch_idx, loader in enumerate(self.valid_data_loader):
+                data, mask = loader["img"].to(self.device), loader["mask"].to(self.device)
+                
+                x_map, list_maps = self.model(data)
+                loss0, loss = self.criterion(list_maps, mask)      
 
                 self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
                 self.valid_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
-                    self.valid_metrics.update(met.__name__, met(output, mask))
+                    self.valid_metrics.update(met.__name__, met(mask, x_map))
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
         # Add histogram of model parameters to the Tensorboard
