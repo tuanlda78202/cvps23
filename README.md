@@ -1,14 +1,10 @@
-# Salient Object Detection for Korean Namecard
+# Salient Object Detection for Korean Name Card
 
-This is the source code for the project "Salient Object Detection for Korean Namecard" of the course "Computer Vision" Summer 2023.
+This is the source code for the project "Salient Object Detection for Korean Name Card" of the course "Computer Vision" Summer 2023.
 
-In this project, we will investigate the powerful of salient object detection in the real world by experimenting it over a various methods to see whether and how it works with Korean namecard dataset.
+In this project, we will investigate the powerful of salient object detection in the real world by experimenting it over a various methods to see whether and how it works with Korean Name Card dataset.
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 ordere  dList=false} -->
-
-<!-- code_chunk_output -->
-
-- [Salient Object Detection for Korean Namecard](#salient-object-detection-for-korean-namecard)
+- [Salient Object Detection for Korean Name Card](#salient-object-detection-for-korean-name-card)
   - [Project Structure](#project-structure)
   - [Usage](#usage)
     - [Config file format](#config-file-format)
@@ -16,55 +12,34 @@ In this project, we will investigate the powerful of salient object detection in
     - [Resuming from checkpoints](#resuming-from-checkpoints)
     - [Evaluating](#evaluating)
     - [Web Interface](#web-interface)
-  - [Acknowledgements](#acknowledgements)
 
 <!-- /code_chunk_output -->
 
 ## Project Structure
 
 ```
-cvp/
-│
-├── train.py - main script to start training
-├── eval.py - script to compute evaluation score on each saved checkpoint of a specified model
-│
-├── parse_config.py - class to handle config file and cli options
-│
+CVP/
+├── scripts/ - bash script to experiments
+|
+├── tools/ - script to training, testing, inference and web interface
+|
+├── trainer/ - trainer classes 
+|
+├── model/ - architectures, losses and metrics
+|
 ├── base/ - abstract base classes
-│   ├── base_data_loader.py
-│   ├── base_rsu.py
-│   └── base_trainer.py
+│   
+├── configs/ - training config
 │
-├── configs/ - all training config files go here
+├── data/ - storing input data
+|
+├── data_loader/ - custom dataset and dataloader
 │
-├── data_loader/ - anything about data loading goes here
-│   ├── data_loaders.py
-│   └── custom_datasets.py
-│
-├── data/ - default directory for storing input data
-│
-├── model/
-│   ├── models/ - all model architectures go here
-│   ├── modules.py - custom modules
-│   └── loss.py - loss functions
-│
-├── saved/
-│   ├── models/ - trained models are saved here
-│   └── log/ - default logdir for tensorboard and logging output
-│
-├── trainer/ - all trainer classes go here
-│   └── ...
+├── saved/ - trained models config, log-dir and logging output
 │
 ├── logger/ - module for tensorboard visualization and logging
-│   ├── visualization.py
-│   ├── logger.py
-│   └── logger_config.json
-│
+|
 ├── utils/ - utility functions
-│   ├── utils.py
-│   └── ...
-│
-...
 ```
 
 ## Usage
@@ -77,16 +52,15 @@ pip install -r requirements.txt
 
 Running private repository on Kaggle:
 1. [Generate your token](https://github.com/settings/tokens)
-2. Get repo address under code -> HTTPS -> your_repo_address=start from `github.com/…../..git` to the end
-
-```
-!git clone https://your_personal_token@your_repo_address.git
-%cd CVP
-!bash scripts/u2net.sh [CONFIG] [BATCH_SIZE] [EPOCHS]
+2. Get repo address from `github.com/.../...git`: 
+```bash
+git clone https://your_personal_token@your_repo_address.git
+cd CVP
 ```
 ### Config file format
 
-Config files are in `.json` format:
+<details>
+<summary>Config files are in .json format</summary>
 
 ```javascript
 {
@@ -165,33 +139,28 @@ Config files are in `.json` format:
 }
 ```
 
-### Using config files
+</details>
 
+### Using config files
 Modify the configurations in `.json` config files, then run:
 
-```
-python train.py --config config.json
+```bash
+bash scripts/u2net_train.sh [CONFIG] [BATCH_SIZE] [EPOCHS]
 ```
 
 ### Resuming from checkpoints
-
 You can resume from a previously saved checkpoint by:
 
-```
-python train.py --resume path/to/checkpoint
+```bash
+bash scripts/u2net_train.sh --resume path/to/the/ckpt
 ```
 
 ### Evaluating
-```
-python test.py
+```bash
+python tools/test.py
 ```
 
 ### Web Interface 
-```python
-python app.py
+```bash
+python tools/app.py
 ```
-
-## Acknowledgements
-
-This project is based on previous work by [victoresque](https://github.com/victoresque) on [PyTorch Template](https://github.com/victoresque/pytorch-template).
-
