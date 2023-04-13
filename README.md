@@ -73,21 +73,16 @@ Install the required packages:
 
 ```
 pip install -r requirements.txt
-export PYTHONPATH="${PYTHONPATH}:/CVP"
 ```
 
-Choose a config file from `configs/` and run:
-
-```
-python tools/train.py --config configs/<config_file>
-```
-
-If you want running private repository on Kaggle:
+Running private repository on Kaggle:
 1. [Generate your token](https://github.com/settings/tokens)
 2. Get repo address under code -> HTTPS -> your_repo_address=start from `github.com/…../..git` to the end
 
 ```
 !git clone https://your_personal_token@your_repo_address.git
+%cd CVP
+!bash scripts/u2net.sh [CONFIG] [BATCH_SIZE] [EPOCHS]
 ```
 ### Config file format
 
