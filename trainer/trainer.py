@@ -44,12 +44,18 @@ class Trainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
         
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        
         for batch_idx, loader in enumerate(self.data_loader):            
             
             data, mask = loader["img"], loader["mask"]
 
-            data = data.type(torch.FloatTensor)
-            mask = mask.type(torch.FloatTensor)
+            if device == "cuda":
+                data = data.type(torch.cuda.FloatTensor)
+                mask = mask.type(torch.cuda.FloatTensor)
+            else:
+                data = data.type(torch.FloatTensor)
+                mask = mask.type(torch.FloatTensor)
             
             self.optimizer.zero_grad()
             
