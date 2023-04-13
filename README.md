@@ -11,6 +11,7 @@ In this project, we will investigate the powerful of salient object detection in
     - [Using config files](#using-config-files)
     - [Resuming from checkpoints](#resuming-from-checkpoints)
     - [Evaluating](#evaluating)
+    - [Inference](#inference)
     - [Web Interface](#web-interface)
 
 <!-- /code_chunk_output -->
@@ -60,11 +61,11 @@ cd CVP
 ### Config file format
 
 <details>
-<summary>Config files are in .json format</summary>
+<summary>Config files are in JSON format</summary>
 
 ```javascript
 {
-    "name": "U2NetFull_KNC_b64",
+    "name": "U2NetFull_scratch_1gpu-bs8_KNC_size512",
     "n_gpu": 1,
   
     "arch": {
@@ -75,11 +76,12 @@ cd CVP
     "data_loader": {
       "type": "KNC_DataLoader",
       "args": {
-        "data_dir": "data",
         "batch_size": 8,
         "shuffle": true,
         "num_workers": 1,
-        "validation_split": 0.1
+        "validation_split": 0.1,
+        "output_size": 320,
+        "crop_size": 288
       }
     },
   
@@ -97,7 +99,9 @@ cd CVP
     "loss": "multi_bce_fusion",
 
 
-    "metrics": ["accuracy", "top_k_acc"],
+    "metrics": [
+      "pixel_accuracy", "dice", "precision", "recall"
+    ],
 
 
     "lr_scheduler": {
@@ -118,6 +122,7 @@ cd CVP
       "save_period": 5,
       "verbosity": 1,
   
+      "tensorboard": false,
       "visual_tool": "wandb",
       "__comment_1.1": "torch.utils.tensorboard",
       "__comment_1.2": "tensorboardX",
@@ -157,8 +162,12 @@ bash scripts/u2net_train.sh --resume path/to/the/ckpt
 
 ### Evaluating
 ```bash
-python tools/test.py
+python tools/eval.py
 ```
+
+### Inference 
+Running demo on notebook `inference.ipynb` in [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tuanlda78202/CVP/)
+
 
 ### Web Interface 
 ```bash
