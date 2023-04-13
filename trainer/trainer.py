@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
+from model.metric import pixel_accuracy, dice, precision, recall
 from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 
@@ -41,50 +42,57 @@ class Trainer(BaseTrainer):
         :param epoch: Integer, current training epoch.
         :return: A log that contains average loss and metric in this epoch.
         """
+        tqdm_batch = tqdm(self.data_loader, total=len(self.data_loader),
+                          desc="Epoch {}:".format(epoch))
         self.model.train()
         self.train_metrics.reset()
         
-        with tqdm(self.data_loader, total= len(self.data_loader),unit="batch") as tepoch:
-            for batch_idx, loader in enumerate(self.data_loader):   
-                         
-                tepoch.set_description(f"Epoch {epoch}")
-                # Load to Device 
-                data, mask = loader["img"].to(self.device), loader["mask"].to(self.device)
+        for batch_idx, loader in enumerate(tqdm_batch):            
+            
+            # Load to Device 
+            data, mask = loader["img"].to(self.device), loader["mask"].to(self.device)
 
-                if self.device == "cuda":
-                    data = data.type(torch.cuda.FloatTensor)
-                    mask = mask.type(torch.cuda.FloatTensor)
-                else:
-                    data = data.type(torch.FloatTensor)
-                    mask = mask.type(torch.FloatTensor)
+            if self.device == "cuda":
+                data = data.type(torch.cuda.FloatTensor)
+                mask = mask.type(torch.cuda.FloatTensor)
+            else:
+                data = data.type(torch.FloatTensor)
+                mask = mask.type(torch.FloatTensor)
+            
+            self.optimizer.zero_grad()
+            
+            # x_map for metrics, list_maps for loss 
+            x_map, list_maps = self.model(data)
                 
-                self.optimizer.zero_grad()
-                
-                # x_map for metrics, list_maps for loss 
-                x_map, list_maps = self.model(data)
+            loss0, loss = self.criterion(list_maps, mask)            
+            loss.backward()
+            self.optimizer.step()
+
+            # Progress bar
+            tqdm_batch.set_postfix(loss=loss.item(),
+                                   pixel_accuracy=pixel_accuracy(mask, x_map),
+                                   dice = dice(mask, x_map),
+                                   precision = precision(mask, x_map),
+                                   recall = recall(mask, x_map))
+            
+            # Logging
+            self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
+            self.train_metrics.update('loss', loss.item())
+            
+            for met in self.metric_ftns:
+                self.train_metrics.update(met.__name__, met(mask, x_map))
+
+            if batch_idx % self.log_step == 0:
+                self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(epoch,
+                                                                           self._progress(batch_idx),
+                                                                           loss.item()))
+                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+
+            if batch_idx == self.len_epoch:
+                break
+        
+        tqdm_batch.close()
                     
-                loss0, loss = self.criterion(list_maps, mask)            
-                loss.backward()
-                self.optimizer.step()
-
-                self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
-                self.train_metrics.update('loss', loss.item())
-                
-                for met in self.metric_ftns:
-                    self.train_metrics.update(met.__name__, met(mask, x_map))
-                    
-                # Progress bar
-                tepoch.set_postfix(loss=loss.item())
-
-                if batch_idx % self.log_step == 0:
-                    self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(epoch,
-                                                                            self._progress(batch_idx),
-                                                                            loss.item()))
-                    self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
-                
-                if batch_idx == self.len_epoch:
-                    break
-                        
         log = self.train_metrics.result()
 
         if self.do_validation:
