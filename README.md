@@ -25,7 +25,7 @@ In this project, we will investigate the powerful of salient object detection in
 ## Folder Structure
 
 ```
-CVP/
+cvps23/
 ├── scripts/ - bash script to experiments
 |
 ├── configs/ - training config

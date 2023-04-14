@@ -1,4 +1,4 @@
-# export PYTHONPATH="${PYTHONPATH}:/CVP"
+# export PYTHONPATH="${PYTHONPATH}:/cvps23"
 # pipreqs for get requirements.txt
 gradio==3.25.0
 numpy==1.23.5
