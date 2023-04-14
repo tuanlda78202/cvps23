@@ -4,22 +4,17 @@
 This is the source code for the project "Salient Object Detection for Korean Name Card" of the course "Computer Vision" Summer 2023.
 
 ---
-
-### Outline
- - [Abstract](#abstract)
- - [Folder Structure](#folder-structure)
- - [Usage](#usage)
-   - [Config file format](#config-file-format)
-   - [Using config files](#using-config-files)
-   - [Resuming from checkpoints](#resuming-from-checkpoints)
-   - [Evaluating](#evaluating)
-   - [Inference](#inference)
-   - [Web Interface](#web-interface)
- - [Architectures](#architectures)
-   - [U^2-Net](#u2-net)
-   - [DIS](#dis)
- - [Citations](#citations)
- - [Contributors](#contributors)
+- [Salient Object Detection for Korean Name Card](#salient-object-detection-for-korean-name-card)
+  - [Abstract](#abstract)
+  - [Folder Structure](#folder-structure)
+  - [Usage](#usage)
+    - [Config file format](#config-file-format)
+    - [Using config files](#using-config-files)
+    - [Resuming from checkpoints](#resuming-from-checkpoints)
+    - [Evaluating](#evaluating)
+    - [Inference](#inference)
+    - [Web Interface](#web-interface)
+  - [Contributors](#contributors)
 ## Abstract 
 Currently, existing image segmentation tasks mainly focus on segmenting objects with specific characteristics, e.g., salient, camouflaged, meticulous, or specific categories. Most of them have the same input/output formats, and barely use exclusive mechanisms designed for segmenting targets in their models, which means almost all tasks are dataset-dependent. Thus, it is very promising to formulate a category-agnostic DIS task for accurately segmenting objects with different structure complexities, regardless of their characteristics. Compared with semantic segmentation, the proposed DIS task usually focuses on images with single or a few targets, from which getting richer accurate details of each target is more feasible. 
 
@@ -183,38 +178,6 @@ Running demo on notebook `inference.ipynb` in [![Open In Colab](https://colab.re
 ```bash
 python tools/app.py
 ```
-## Architectures
-### U^2-Net
-
-| ![U2Net](https://github.com/tuanlda78202/CVP/blob/main/assets/u2net-arch.png) | 
-|:--:| 
-| Illustration of U2-Net architecture. The main architecture is a U-Net like Encoder-Decoder, where each stage consists of newly proposed residual U-block (RSU).|
-
-### DIS
-
-| ![DIS](https://github.com/tuanlda78202/CVP/blob/main/assets/dis-arch.png) | 
-|:--:| 
-| IS-Net baseline: (a) shows the image segmentation component, (b) illustrates the ground truth encoder built upon the intermediate supervision (IS) component.|
-
-## Citations 
-```bash
-@InProceedings{Qin_2020_PR,
-      title = {U2-Net: Going Deeper with Nested U-Structure for Salient Object Detection},
-      author = {Qin, Xuebin and Zhang, Zichen and Huang, Chenyang and Dehghan, Masood and Zaiane, Osmar and Jagersand, Martin},
-      journal = {Pattern Recognition},
-      volume = {106},
-      pages = {107404},
-      year = {2020}
-}
-
-@InProceedings{qin2022,
-      author={Xuebin Qin and Hang Dai and Xiaobin Hu and Deng-Ping Fan and Ling Shao and Luc Van Gool},
-      title={Highly Accurate Dichotomous Image Segmentation},
-      booktitle={ECCV},
-      year={2022}
-}
-```
-This project is based on previous work by [victoresque](https://github.com/victoresque) on [PyTorch Template](https://github.com/victoresque/pytorch-template).
 
 ## Contributors 
 <!-- https://contrib.rocks/preview?repo=tuanlda78202%2FCVP -->
