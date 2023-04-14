@@ -13,6 +13,8 @@ In this project, we will investigate the powerful of salient object detection in
     - [Evaluating](#evaluating)
     - [Inference](#inference)
     - [Web Interface](#web-interface)
+  - [Collaborators](#collaborators)
+  - [Contribute](#contribute)
 
 <!-- /code_chunk_output -->
 
@@ -173,3 +175,15 @@ Running demo on notebook `inference.ipynb` in [![Open In Colab](https://colab.re
 ```bash
 python tools/app.py
 ```
+
+## Collaborators 
+| Name                         | Student ID       | Email                                      |
+| :---                         |    :----:        |          :---:                             |
+| Le Duc Anh Tuan              | 20204929         | tuan.lda204929@sis.hust.edu.vn            |
+| Nguyen Van Thanh Tung             | 20190090         | tung.nvt190090@sis.hust.edu.vn            |
+
+## <div align="left">Contribute</div>
+
+<a href="https://github.com/tuanlda78202/CVP/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=tuanlda78202/CVP" />
+</a>
