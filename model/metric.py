@@ -185,28 +185,34 @@ class BinaryMetrics():
         pixel_acc, dice, precision, specificity, recall = self._calculate_overlap_metrics(y_true.to(y_pred.device,
                                                                                                     dtype=torch.float),
                                                                                           activated_pred)
-        return [pixel_acc, dice, precision, specificity, recall]
+        return pixel_acc, dice, precision, specificity, recall
 
 def pixel_accuracy(y_true, y_pred):
-    metric_calculator = SegmentationMetrics()
+    metric_calculator = BinaryMetrics()
     
-    pixel_accuracy, dice, precision, recall = metric_calculator(y_true, y_pred)
+    pixel_accuracy, dice, precision, recall, specificity= metric_calculator(y_true, y_pred)
     return pixel_accuracy
 
 def dice(y_true, y_pred):
-    metric_calculator = SegmentationMetrics()
+    metric_calculator = BinaryMetrics()
     
-    pixel_accuracy, dice, precision, recall = metric_calculator(y_true, y_pred)
+    pixel_accuracy, dice, precision, recall, specificity = metric_calculator(y_true, y_pred)
     return dice
 
 def precision(y_true, y_pred):
-    metric_calculator = SegmentationMetrics()
+    metric_calculator = BinaryMetrics()
     
-    pixel_accuracy, dice, precision, recall = metric_calculator(y_true, y_pred)
+    pixel_accuracy, dice, precision, recall, specificity = metric_calculator(y_true, y_pred)
     return precision
 
 def recall(y_true, y_pred):
-    metric_calculator = SegmentationMetrics()
+    metric_calculator = BinaryMetrics()
     
-    pixel_accuracy, dice, precision, recall = metric_calculator(y_true, y_pred)
+    pixel_accuracy, dice, precision, recall, specificity= metric_calculator(y_true, y_pred)
     return recall
+
+def specificity(y_true, y_pred):
+    metric_calculator = BinaryMetrics()
+    
+    pixel_accuracy, dice, precision, recall, specificity = metric_calculator(y_true, y_pred)
+    return specificity

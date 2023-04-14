@@ -218,7 +218,3 @@ class ToTensorLab(object):
 		tmpImg = tmpImg.transpose((2, 0, 1))
 
 		return {'img_idx':torch.from_numpy(img_idx), 'img': torch.from_numpy(tmpImg), 'mask': torch.from_numpy(tmpMask)}
-
-train_size = int(0.8 * len(full_dataset))
-test_size = len(full_dataset) - train_size
-train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])

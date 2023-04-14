@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
-from model.metric import pixel_accuracy, dice, precision, recall
+from model.metric import pixel_accuracy, dice, precision, recall, specificity
 from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb
@@ -75,25 +75,28 @@ class Trainer(BaseTrainer):
             self.optimizer.step()
 
             # Variable for logging 
-            log_loss=loss.item()
-            log_pa=pixel_accuracy(mask, x_map)
+            log_loss = loss.item()
+            log_pa = pixel_accuracy(mask, x_map)
             log_dice = dice(mask, x_map)
             log_precision = precision(mask, x_map)
             log_recall = recall(mask, x_map)
+            log_specificity = specificity(mask, x_map)
             
             # TQDM Progress bar
             tqdm_batch.set_postfix(loss=log_loss,
                                    pixel_accuracy=log_pa,
                                    dice = log_dice,
                                    precision = log_precision,
-                                   recall = log_recall)
+                                   recall = log_recall,
+                                   specificity = log_specificity)
             
             # WandB            
             wandb.log({"loss": log_loss, 
                         "pixel_accuracy": log_pa,
                         "dice": log_dice,
                         "precision": log_precision,
-                        "recall": log_recall})
+                        "recall": log_recall,
+                        "specificity": log_specificity})
             
             # Logging 
             self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)

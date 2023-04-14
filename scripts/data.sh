@@ -1,7 +1,7 @@
 # Download data and unzip 
 gdown link/drive/of/data -O data/data.zip
 unzip data.zip > /dev/null
-del data/data.zip
+rm -rf data/data.zip
 
 # Tree
 apt-get -q install tree
