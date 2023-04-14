@@ -15,6 +15,7 @@ This is the source code for the project "Salient Object Detection for Korean Nam
  - [Architectures](#architectures)
    - [U^2-Net](#u2-net)
    - [DIS](#dis)
+ - [Citations](#citations)
  - [Contributors](#contributors)
 ## Abstract 
 Currently, existing image segmentation tasks mainly focus on segmenting objects with specific characteristics, e.g., salient, camouflaged, meticulous, or specific categories. Most of them have the same input/output formats, and barely use exclusive mechanisms designed for segmenting targets in their models, which means almost all tasks are dataset-dependent. Thus, it is very promising to formulate a category-agnostic DIS task for accurately segmenting objects with different structure complexities, regardless of their characteristics. Compared with semantic segmentation, the proposed DIS task usually focuses on images with single or a few targets, from which getting richer accurate details of each target is more feasible. 
