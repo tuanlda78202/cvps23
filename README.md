@@ -180,28 +180,22 @@ Running demo on notebook `inference.ipynb` in [![Open In Colab](https://colab.re
 python tools/app.py
 ```
 ## Architectures
-### [U^2-Net](https://arxiv.org/abs/2005.09007)
+### U^2-Net
 
 | ![U2Net](https://github.com/tuanlda78202/CVP/blob/main/assets/u2net-arch.png) | 
 |:--:| 
 | Illustration of U2-Net architecture. The main architecture is a U-Net like Encoder-Decoder, where each stage consists of newly proposed residual U-block (RSU).|
 
-### [DIS](https://arxiv.org/abs/2203.03041)
+### DIS
 
 | ![DIS](https://github.com/tuanlda78202/CVP/blob/main/assets/dis-arch.png) | 
 |:--:| 
 | IS-Net baseline: (a) shows the image segmentation component, (b) illustrates the ground truth encoder built upon the intermediate supervision (IS) component.|
 
-## Contributors 
-<!-- https://contrib.rocks/preview?repo=tuanlda78202%2FCVP -->
-
-<a href="https://github.com/tuanlda78202/CVP/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=tuanlda78202/CVP" />
-</a>
-
 ## Citations 
+This project is based on previous work by [victoresque](https://github.com/victoresque) on [PyTorch Template](https://github.com/victoresque/pytorch-template).
 
-```
+```bash
 @InProceedings{Qin_2020_PR,
       title = {U2-Net: Going Deeper with Nested U-Structure for Salient Object Detection},
       author = {Qin, Xuebin and Zhang, Zichen and Huang, Chenyang and Dehghan, Masood and Zaiane, Osmar and Jagersand, Martin},
@@ -219,6 +213,11 @@ python tools/app.py
 }
 ```
 
+## Contributors 
+<!-- https://contrib.rocks/preview?repo=tuanlda78202%2FCVP -->
+
+<a href="https://github.com/tuanlda78202/CVP/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=tuanlda78202/CVP" /></a>
 <a href="https://github.com/tuanlda78202/CVP/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=tuanlda78202/CVP" />
 </a>
