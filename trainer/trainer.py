@@ -53,14 +53,18 @@ class Trainer(BaseTrainer):
         
         for batch_idx, loader in enumerate(tqdm_batch):            
             # Load to Device 
-            data, mask = loader["img"].to(self.device), loader["mask"].to(self.device)
-
             if self.device == "cuda":
-                data = data.type(torch.cuda.FloatTensor)
-                mask = mask.type(torch.cuda.FloatTensor)
-            else:
-                data = data.type(torch.FloatTensor)
-                mask = mask.type(torch.FloatTensor)
+                data = loader["img"].to(device=self.device, dtype=torch.cuda.FloatTensor)
+                mask = loader["mask"].to(device=self.device, dtype=torch.cudaFloatTensor)
+                
+            elif self.device == "cpu":
+                data = loader["img"].to(device=self.device, dtype=torch.FloatTensor)
+                mask = loader["mask"].to(device=self.device, dtype=torch.FloatTensor)
+                
+            else: # MPS 
+                data = loader["img"].to(device=self.device, dtype=torch.float32)
+                mask = loader["mask"].to(device=self.device, dtype=torch.float32)
+ 
             self.optimizer.zero_grad()
             
             # x_map for metrics, list_maps for loss 
@@ -70,21 +74,30 @@ class Trainer(BaseTrainer):
             loss.backward()
             self.optimizer.step()
 
-            # Progress bar
-            tqdm_batch.set_postfix(loss=loss.item(),
-                                   pixel_accuracy=pixel_accuracy(mask, x_map),
-                                   dice = dice(mask, x_map),
-                                   precision = precision(mask, x_map),
-                                   recall = recall(mask, x_map))
+            # Variable for logging 
+            log_loss=loss.item()
+            log_pa=pixel_accuracy(mask, x_map)
+            log_dice = dice(mask, x_map)
+            log_precision = precision(mask, x_map)
+            log_recall = recall(mask, x_map)
             
-            print(self.writer)
-            self.writer.log({"loss": loss.item(), 
-                             "pixel_accuracy": pixel_accuracy(mask, x_map),
-                             "dice":dice(mask, x_map)
-                            })
-            # Logging
+            # TQDM Progress bar
+            tqdm_batch.set_postfix(loss=log_loss,
+                                   pixel_accuracy=log_pa,
+                                   dice = log_dice,
+                                   precision = log_precision,
+                                   recall = log_recall)
+            
+            # WandB            
+            wandb.log({"loss": log_loss, 
+                        "pixel_accuracy": log_pa,
+                        "dice": log_dice,
+                        "precision": log_precision,
+                        "recall": log_recall})
+            
+            # Logging 
             self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
-            self.train_metrics.update('loss', loss.item())
+            self.train_metrics.update('loss', log_loss)
             
             for met in self.metric_ftns:
                 self.train_metrics.update(met.__name__, met(mask, x_map))

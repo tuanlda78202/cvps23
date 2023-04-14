@@ -10,9 +10,9 @@ from configs.parse_config import ConfigParser
 from trainer import Trainer
 import warnings
 import sys
+import os 
+# export PYTHONPATH="${PYTHONPATH}:/cvps23"
 warnings.filterwarnings("ignore")
-#sys.path.append("./cvps23")
-
 
 # fix random seeds for reproducibility
 SEED = 42
@@ -36,7 +36,6 @@ def main(config):
 
     # Device GPU training
     device = "mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu")
-    device = "cpu"
     model = model.to(device)
 
     # Loss & Metrics
