@@ -14,7 +14,6 @@ This is the source code for the project "Salient Object Detection for Korean Nam
     - [Resuming from checkpoints](#resuming-from-checkpoints)
     - [Evaluating](#evaluating)
     - [Inference](#inference)
-    - [Web Interface](#web-interface)
   - [Contributors](#contributors)
 ## Abstract 
 Currently, existing image segmentation tasks mainly focus on segmenting objects with specific characteristics, e.g., salient, camouflaged, meticulous, or specific categories. Most of them have the same input/output formats, and barely use exclusive mechanisms designed for segmenting targets in their models, which means almost all tasks are dataset-dependent. Thus, it is very promising to formulate a category-agnostic DIS task for accurately segmenting objects with different structure complexities, regardless of their characteristics. Compared with semantic segmentation, the proposed DIS task usually focuses on images with single or a few targets, from which getting richer accurate details of each target is more feasible. 
@@ -190,14 +189,9 @@ python tools/eval.py
 ```
 
 ### Inference 
-Running demo on notebook `inference.ipynb` in [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tuanlda78202/CVP/)
+- Running demo on notebook [`inference.ipynb`](https://github.com/tuanlda78202/cvps23/blob/main/tools/inference.ipynb) in [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tuanlda78202/CVP/)
 
-
-### Web Interface 
-```python
-python tools/app.py
-```
-Web Interface: Integrated into [Huggingface Spaces 🤗](https://huggingface.co/spaces) using [Gradio](https://github.com/gradio-app/gradio). Try out the Web Demo [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/doevent/dis-background-removal) <br> 
+- Web Interface: Integrated into [Huggingface Spaces 🤗](https://huggingface.co/spaces) using [Gradio](https://github.com/gradio-app/gradio). Try out the Web Demo [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/doevent/dis-background-removal) <br> 
 
 
 ## Contributors 
