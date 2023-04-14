@@ -1,11 +1,5 @@
 import py_sod_metrics
 
-FM = py_sod_metrics.Fmeasure()
-WFM = py_sod_metrics.WeightedFmeasure()
-SM = py_sod_metrics.Smeasure()
-EM = py_sod_metrics.Emeasure()
-MAE = py_sod_metrics.MAE()
-
 # F-measure
 def maxfm(pred, gt):
     FM = py_sod_metrics.Fmeasure()

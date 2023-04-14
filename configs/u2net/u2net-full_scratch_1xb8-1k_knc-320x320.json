@@ -34,7 +34,7 @@
 
 
     "metrics": [
-      "fm", "mae", "wfm", "sm"
+      "maxfm", "mae", "wfm", "sm"
     ],
 
 

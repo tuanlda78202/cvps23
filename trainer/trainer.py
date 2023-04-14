@@ -53,13 +53,11 @@ class Trainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
         
-        # CPU 
-
         for batch_idx, loader in enumerate(tqdm_batch):            
             # Load to Device 
             if self.device == "cuda":
                 data = loader["img"].to(device=self.device, dtype=torch.cuda.FloatTensor)
-                mask = loader["mask"].to(device=self.device, dtype=torch.cudaFloatTensor)
+                mask = loader["mask"].to(device=self.device, dtype=torch.cuda.FloatTensor)
                 
             elif self.device == "cpu":
                 data = loader["img"].to(device=self.device)
@@ -85,6 +83,8 @@ class Trainer(BaseTrainer):
             
             # Metrics, detach tensor auto-grad to numpy
             map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
+            # If CUDA 
+            # map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
             log_maxfm = maxfm(map_np, mask_np)
             log_mae = mae(map_np, mask_np)
             log_wfm = wfm(map_np, mask_np)
@@ -148,7 +148,7 @@ class Trainer(BaseTrainer):
                 # Load to Device 
                 if self.device == "cuda":
                     data = loader["img"].to(device=self.device, dtype=torch.cuda.FloatTensor)
-                    mask = loader["mask"].to(device=self.device, dtype=torch.cudaFloatTensor)
+                    mask = loader["mask"].to(device=self.device, dtype=torch.cuda.FloatTensor)
                 
                 elif self.device == "cpu":
                     data = loader["img"].to(device=self.device, dtype=torch.FloatTensor)
@@ -162,12 +162,17 @@ class Trainer(BaseTrainer):
                 x_map, list_maps = self.model(data)
                 loss0, loss = self.criterion(list_maps, mask)      
 
+                # Metrics, detach tensor auto-grad to numpy
+                map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
+                # If CUDA 
+                # map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
+                
                 # Logging
                 self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
                 self.valid_metrics.update('loss', loss.item())
                 
                 for met in self.metric_ftns:
-                    self.valid_metrics.update(met.__name__, met(mask, x_map))
+                    self.valid_metrics.update(met.__name__, met(map_np, mask_np))
                     
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 

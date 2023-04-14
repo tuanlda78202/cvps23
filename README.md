@@ -35,7 +35,9 @@ cvps23/
 |
 ├── trainer/ - trainer classes 
 |
-├── model/ - architectures, losses and metrics
+├── model/ 
+|   ├── architecture/ - model architectures
+|   ├── README.md - losses and metrics definition
 |
 ├── base/ - abstract base classes
 │   
@@ -45,7 +47,7 @@ cvps23/
 │
 ├── saved/ - trained models config, log-dir and logging output
 │
-├── logger/ - module for tensorboard visualization and logging
+├── logger/ - module for tensorboard/wandb visualization and logging
 |
 ├── utils/ - utility functions
 ```
