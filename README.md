@@ -7,6 +7,7 @@ This is the source code for the project "Salient Object Detection for Korean Nam
 - [Salient Object Detection for Korean Name Card](#salient-object-detection-for-korean-name-card)
   - [Abstract](#abstract)
   - [Folder Structure](#folder-structure)
+  - [Model Zoo](#model-zoo)
   - [Usage](#usage)
     - [Config file format](#config-file-format)
     - [Using config files](#using-config-files)
@@ -29,8 +30,7 @@ CVP/
 |
 ├── configs/ - training config
 |   ├── README.md - config name style
-│   ├── u2net/README.md - abstract and experiment results U^2-Net
-│   └── dis/README.md - abstract and experiment results DIS
+│   ├── */README.md - abstract and experiment results model
 |
 ├── tools/ - script to training, testing, inference and web interface
 |
@@ -50,6 +50,22 @@ CVP/
 |
 ├── utils/ - utility functions
 ```
+## Model Zoo 
+<summary></summary>
+
+<table style="margin-left:auto;margin-right:auto;font-size:1.4vw;padding:10px 10px;text-align:center;vertical-align:center;">
+  <tr>
+    <td colspan="5" style="font-weight:bold;">Salient Object Detection</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/mobilenetv3/README.md">MobileNetV3</a> (ICCV'2019)</td>
+    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/u2net/README.md">U2Net</a> (PR'2020)</td>
+    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/bisenet/README.md">BiSeNet</a> (CVPR'2021)</td>
+    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">DIS</a> (ECCV'2022)</td>
+    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/inspyrenet/README.md">InSPyReNet</a> (ACCV'2022)</td>
+  </tr>
+
+</table>
 
 ## Usage
 
