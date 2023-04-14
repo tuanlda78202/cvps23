@@ -1,24 +1,21 @@
 # Salient Object Detection for Korean Name Card
-
-| ![DIS-R](https://github.com/tuanlda78202/CVP/blob/main/assets/result-dis.png) | 
-|:--:| 
-| |
+![DIS-R](https://github.com/tuanlda78202/CVP/blob/main/assets/result-dis.png)
 
 This is the source code for the project "Salient Object Detection for Korean Name Card" of the course "Computer Vision" Summer 2023.
-- [Salient Object Detection for Korean Name Card](#salient-object-detection-for-korean-name-card)
-  - [Abstract](#abstract)
-  - [Folder Structure](#folder-structure)
-  - [Usage](#usage)
-    - [Config file format](#config-file-format)
-    - [Using config files](#using-config-files)
-    - [Resuming from checkpoints](#resuming-from-checkpoints)
-    - [Evaluating](#evaluating)
-    - [Inference](#inference)
-    - [Web Interface](#web-interface)
-  - [Architectures](#architectures)
-    - [U^2-Net](#u2-net)
-    - [DIS](#dis)
-  - [Contributors](#contributors)
+### Outline
+ - [Abstract](#abstract)
+ - [Folder Structure](#folder-structure)
+ - [Usage](#usage)
+   - [Config file format](#config-file-format)
+   - [Using config files](#using-config-files)
+   - [Resuming from checkpoints](#resuming-from-checkpoints)
+   - [Evaluating](#evaluating)
+   - [Inference](#inference)
+   - [Web Interface](#web-interface)
+ - [Architectures](#architectures)
+   - [U^2-Net](#u2-net)
+   - [DIS](#dis)
+ - [Contributors](#contributors)
 ## Abstract 
 Currently, existing image segmentation tasks mainly focus on segmenting objects with specific characteristics, e.g., salient, camouflaged, meticulous, or specific categories. Most of them have the same input/output formats, and barely use exclusive mechanisms designed for segmenting targets in their models, which means almost all tasks are dataset-dependent. Thus, it is very promising to formulate a category-agnostic DIS task for accurately segmenting objects with different structure complexities, regardless of their characteristics. Compared with semantic segmentation, the proposed DIS task usually focuses on images with single or a few targets, from which getting richer accurate details of each target is more feasible. 
 
@@ -197,6 +194,30 @@ python tools/app.py
 
 ## Contributors 
 <!-- https://contrib.rocks/preview?repo=tuanlda78202%2FCVP -->
+
+<a href="https://github.com/tuanlda78202/CVP/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=tuanlda78202/CVP" />
+</a>
+
+## Citations 
+
+```
+@InProceedings{Qin_2020_PR,
+      title = {U2-Net: Going Deeper with Nested U-Structure for Salient Object Detection},
+      author = {Qin, Xuebin and Zhang, Zichen and Huang, Chenyang and Dehghan, Masood and Zaiane, Osmar and Jagersand, Martin},
+      journal = {Pattern Recognition},
+      volume = {106},
+      pages = {107404},
+      year = {2020}
+}
+
+@InProceedings{qin2022,
+      author={Xuebin Qin and Hang Dai and Xiaobin Hu and Deng-Ping Fan and Ling Shao and Luc Van Gool},
+      title={Highly Accurate Dichotomous Image Segmentation},
+      booktitle={ECCV},
+      year={2022}
+}
+```
 
 <a href="https://github.com/tuanlda78202/CVP/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=tuanlda78202/CVP" />
