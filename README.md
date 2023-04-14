@@ -2,6 +2,9 @@
 ![DIS-R](https://github.com/tuanlda78202/CVP/blob/main/assets/result-dis.png)
 
 This is the source code for the project "Salient Object Detection for Korean Name Card" of the course "Computer Vision" Summer 2023.
+
+---
+
 ### Outline
  - [Abstract](#abstract)
  - [Folder Structure](#folder-structure)
