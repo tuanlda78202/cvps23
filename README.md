@@ -194,9 +194,11 @@ Running demo on notebook `inference.ipynb` in [![Open In Colab](https://colab.re
 
 
 ### Web Interface 
-```bash
+```python
 python tools/app.py
 ```
+Web Interface: Integrated into [Huggingface Spaces 🤗](https://huggingface.co/spaces) using [Gradio](https://github.com/gradio-app/gradio). Try out the Web Demo [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/doevent/dis-background-removal) <br> 
+
 
 ## Contributors 
 <!-- https://contrib.rocks/preview?repo=tuanlda78202%2FCVP -->
