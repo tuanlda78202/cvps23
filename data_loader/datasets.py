@@ -7,6 +7,12 @@ from torch.utils.data import Dataset
 
 # Korean Name Card Datasets
 class KNC_Dataset(Dataset):
+    
+    """
+    A custom Dataset class must implement three functions: __init__, __len__, and __getitem__. 
+    Dataset retrieves dataset’s features and labels ONE sample at a time
+    """
+    
     def __init__(self, img_list, mask_list, transform):
         self.img_list = img_list
         self.mask_list = mask_list
@@ -17,6 +23,14 @@ class KNC_Dataset(Dataset):
         return self.len
     
     def __getitem__(self, idx):
+        
+        """
+        The __getitem__ function loads and returns a sample from the dataset at the given index idx. 
+        Based on the index, it identifies the image’s location on disk, converts that to a tensor using read_image, 
+        retrieves the corresponding label from the csv data in self.img_labels, calls the transform functions on them (if applicable), 
+        and returns the tensor image and corresponding label in a tuple.
+        """
+        
         img = io.imread(self.img_list[idx])
         img_idx = np.array([idx])
 
@@ -204,3 +218,7 @@ class ToTensorLab(object):
 		tmpImg = tmpImg.transpose((2, 0, 1))
 
 		return {'img_idx':torch.from_numpy(img_idx), 'img': torch.from_numpy(tmpImg), 'mask': torch.from_numpy(tmpMask)}
+
+train_size = int(0.8 * len(full_dataset))
+test_size = len(full_dataset) - train_size
+train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])

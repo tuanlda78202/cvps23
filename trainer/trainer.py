@@ -135,11 +135,25 @@ class Trainer(BaseTrainer):
         
         with torch.no_grad():
             for batch_idx, loader in enumerate(self.valid_data_loader):
-                data, mask = loader["img"].to(self.device), loader["mask"].to(self.device)
                 
+                # Load to Device 
+                if self.device == "cuda":
+                    data = loader["img"].to(device=self.device, dtype=torch.cuda.FloatTensor)
+                    mask = loader["mask"].to(device=self.device, dtype=torch.cudaFloatTensor)
+                
+                elif self.device == "cpu":
+                    data = loader["img"].to(device=self.device, dtype=torch.FloatTensor)
+                    mask = loader["mask"].to(device=self.device, dtype=torch.FloatTensor)
+                
+                else: # MPS 
+                    data = loader["img"].to(device=self.device, dtype=torch.float32)
+                    mask = loader["mask"].to(device=self.device, dtype=torch.float32)
+                
+                # Forward 
                 x_map, list_maps = self.model(data)
                 loss0, loss = self.criterion(list_maps, mask)      
 
+                # Logging
                 self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
                 self.valid_metrics.update('loss', loss.item())
                 

@@ -1,0 +1,8 @@
+torch
+torchvision
+requests
+gdown
+matplotlib
+opencv-python
+Pillow==8.0.0
+scikit-image==0.15.0

@@ -2,10 +2,9 @@ import numpy as np
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 
-# Generating next batch
+# Generating next batch: train_features, train_labels = next(iter(train_dataloader))
 # Data shuffling
 # Generating validation data loader by calling BaseDataLoader.split_validation()
-
 class BaseDataLoader(DataLoader):
     """
     Base class for all data loaders
@@ -16,8 +15,9 @@ class BaseDataLoader(DataLoader):
 
         self.batch_idx = 0
         self.n_samples = len(dataset)
-
-        self.sampler, self.valid_sampler = self._split_sampler(self.validation_split)
+        
+        # Split Train & Valid
+        self.sampler, self.valid_sampler = self._split_sampler(split=self.validation_split)
 
         self.init_kwargs = {
             'dataset': dataset,
@@ -46,10 +46,11 @@ class BaseDataLoader(DataLoader):
         valid_idx = idx_full[0:len_valid]
         train_idx = np.delete(idx_full, np.arange(0, len_valid))
 
+        # Samples elements randomly from a given list of indices, without replacement.
         train_sampler = SubsetRandomSampler(train_idx)
         valid_sampler = SubsetRandomSampler(valid_idx)
 
-        # turn off shuffle option which is mutually exclusive with sampler
+        # Turn off shuffle option which is mutually exclusive with sampler
         self.shuffle = False
         self.n_samples = len(train_idx)
 

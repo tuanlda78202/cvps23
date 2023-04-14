@@ -60,8 +60,8 @@
       "api_key_file": "./configs/wandb-api-key-file",
       
       "project": "cvps23",
-      "entity": "charles",
-      "name": "U2NetFull_scratch_1gpu-bs8_KNC_size512"
+      "entity": "tuanlda78202",
+      "name": "U2NetFull_scratch_1gpu-bs8_KNC_size320"
     },
   
   
