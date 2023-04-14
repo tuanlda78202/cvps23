@@ -5,6 +5,7 @@ from base import BaseTrainer
 from model.metric import pixel_accuracy, dice, precision, recall
 from utils import inf_loop, MetricTracker
 from tqdm import tqdm
+import wandb
 
 class Trainer(BaseTrainer):
     """
@@ -42,16 +43,15 @@ class Trainer(BaseTrainer):
         :param epoch: Integer, current training epoch.
         :return: A log that contains average loss and metric in this epoch.
         """
+        
         tqdm_batch = tqdm(iterable=self.data_loader, 
                           desc="Epoch {}".format(epoch),
                           total=len(self.data_loader),
                           unit="it")
-
         self.model.train()
         self.train_metrics.reset()
         
         for batch_idx, loader in enumerate(tqdm_batch):            
-            
             # Load to Device 
             data, mask = loader["img"].to(self.device), loader["mask"].to(self.device)
 
@@ -61,12 +61,11 @@ class Trainer(BaseTrainer):
             else:
                 data = data.type(torch.FloatTensor)
                 mask = mask.type(torch.FloatTensor)
-            
             self.optimizer.zero_grad()
             
             # x_map for metrics, list_maps for loss 
             x_map, list_maps = self.model(data)
-                
+            
             loss0, loss = self.criterion(list_maps, mask)            
             loss.backward()
             self.optimizer.step()
@@ -78,6 +77,11 @@ class Trainer(BaseTrainer):
                                    precision = precision(mask, x_map),
                                    recall = recall(mask, x_map))
             
+            print(self.writer)
+            self.writer.log({"loss": loss.item(), 
+                             "pixel_accuracy": pixel_accuracy(mask, x_map),
+                             "dice":dice(mask, x_map)
+                            })
             # Logging
             self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
             self.train_metrics.update('loss', loss.item())
@@ -93,7 +97,7 @@ class Trainer(BaseTrainer):
 
             if batch_idx == self.len_epoch:
                 break
-        
+            
         tqdm_batch.close()
                     
         log = self.train_metrics.result()
@@ -115,6 +119,7 @@ class Trainer(BaseTrainer):
         """
         self.model.eval()
         self.valid_metrics.reset()
+        
         with torch.no_grad():
             for batch_idx, loader in enumerate(self.valid_data_loader):
                 data, mask = loader["img"].to(self.device), loader["mask"].to(self.device)
@@ -124,13 +129,16 @@ class Trainer(BaseTrainer):
 
                 self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
                 self.valid_metrics.update('loss', loss.item())
+                
                 for met in self.metric_ftns:
                     self.valid_metrics.update(met.__name__, met(mask, x_map))
+                    
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
         # Add histogram of model parameters to the Tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins='auto')
+            
         return self.valid_metrics.result()
 
     def _progress(self, batch_idx):

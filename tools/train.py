@@ -6,14 +6,13 @@ import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.architecture as module_arch
-import os 
-import glob
 from configs.parse_config import ConfigParser
 from trainer import Trainer
-from utils import prepare_device
-
 import warnings
+import sys
 warnings.filterwarnings("ignore")
+#sys.path.append("./cvps23")
+
 
 # fix random seeds for reproducibility
 SEED = 42

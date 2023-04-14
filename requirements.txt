@@ -1,13 +1,12 @@
-# export PYTHONPATH="${PYTHONPATH}:/cvps23"
-# pipreqs for get requirements.txt
-gradio==3.25.0
+gradio==3.26.0
 numpy==1.23.5
 opencv_python==4.7.0.72
 paddlehub==1.8.0
 pandas==1.5.2
+psutil==5.9.0
+py_cpuinfo==9.0.0
 skimage==0.0
 torch==1.13.1
 torchvision==0.14.1
 tqdm==4.64.1
 wandb==0.13.6
-torchsummary==1.5.1

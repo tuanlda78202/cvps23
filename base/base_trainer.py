@@ -1,7 +1,7 @@
 import torch
 from abc import abstractmethod
 from numpy import inf
-from logger import TensorboardWriter
+from logger import TensorboardWriter, WandB
 
 '''
 - Training process logging
@@ -46,12 +46,25 @@ class BaseTrainer:
             if self.early_stop <= 0:
                 self.early_stop = inf
 
-        self.start_epoch = 1
-
+        self.start_epoch = 0
+        self.iters = 0 
         self.checkpoint_dir = config.save_dir
 
-        # setup visualization writer instance                
-        self.writer = TensorboardWriter(config.log_dir, self.logger, cfg_trainer['tensorboard'])
+        # Setup visualization writer instance       
+                 
+        if cfg_trainer['visual_tool'] in ['tensorboard', 'tensorboardX']:
+            self.writer = TensorboardWriter(config.log_dir, self.logger, cfg_trainer['visual_tool'])
+            
+        elif cfg_trainer['visual_tool'] == 'wandb':
+            visual_config = {"Architecture": config['arch']['type'], "trainer": cfg_trainer["type"]}
+            self.writer = WandB(config['name'], cfg_trainer, self.logger, cfg_trainer['visual_tool'], visualize_config=visual_config)
+            
+        elif cfg_trainer['visual_tool'] == "None":
+            self.writer = None
+            
+        else:
+            raise ImportError("Visualization tool isn't exists, please refer to comment 1.* "
+                              "to choose appropriate module")
 
         if config.resume is not None:
             self._resume_checkpoint(config.resume)
@@ -81,7 +94,7 @@ class BaseTrainer:
             for key, value in log.items():
                 self.logger.info('    {:15s}: {}'.format(str(key), value))
 
-            # evaluate model performance according to configured metric, save best checkpoint as model_best
+            # Evaluate model performance according to configured metric, save best checkpoint as model_best
             best = False
             if self.mnt_mode != 'off':
                 try:
@@ -108,6 +121,10 @@ class BaseTrainer:
 
             if epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=best)
+                
+        if self.writer is not None and self.writer.name == "wandb":
+            self.writer.writer.finish()
+            
 
     def _save_checkpoint(self, epoch, save_best=False):
         """
@@ -121,6 +138,7 @@ class BaseTrainer:
         state = {
             'arch': arch,
             'epoch': epoch,
+            'iter': self.iters,
             'state_dict': self.model.state_dict(),
             'optimizer': self.optimizer.state_dict(),
             'monitor_best': self.mnt_best,

@@ -50,23 +50,18 @@
   "trainer": {
     "type": "Trainer",
 
-    "epochs": 50,
+    "epochs": 100,
 
     "save_dir": "saved/",
     "save_period": 5,
     "verbosity": 1,
 
-    "tensorboard": false,
     "visual_tool": "wandb",
-    "__comment_1.1": "torch.utils.tensorboard",
-    "__comment_1.2": "tensorboardX",
-    "__comment_1.3": "wandb",
-    "__comment_1.4": "None",
-    "api_key_file": "./wandb-api-key-file",
-    "project": "knc",
-    "entity": "cvp-knc",
-    "name": "test",
-    "__comment_2.1": "Set name for one running"
+    "api_key_file": "./configs/wandb-api-key-file",
+    
+    "project": "cvps23",
+    "entity": "tuanlda78202",
+    "name": "U2NetLite_scratch_1gpu-bs4_KNC_size320"
   },
 
 

@@ -92,3 +92,21 @@ def mask_image_list():
         mask_list.append(data_dir + mask_dir + img_idx + mask_ext)
     
     return img_list, mask_list
+
+
+def init_wandb(wandb_lib, project, entity, api_key_file='./configs/wandb-api-key-file', dir = "./saved", name=None, config=None):
+    """
+    Return a new W&B run to be used for logging purposes
+    """
+    assert os.path.exists(api_key_file), "The given W&B API key file does not exist"
+    
+    # Set environment API & DIR
+    api_key_value = open(api_key_file, "r").read().strip()
+    os.environ["WANDB_API_KEY"] = api_key_value
+    os.environ["WANDB_DIR"] = dir
+    
+    # name: user_name in WandB
+    return wandb_lib.init(project=project,
+                          entity=entity,
+                          name=name,
+                          config=config)

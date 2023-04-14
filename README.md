@@ -73,6 +73,8 @@ Install the required packages:
 ```
 pip install -r requirements.txt
 ```
+<!-- export PYTHONPATH="${PYTHONPATH}:/cvps23" -->
+<!-- pipreqs for get requirements.txt -->
 
 Running private repository on Kaggle:
 1. [Generate your token](https://github.com/settings/tokens)
