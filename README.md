@@ -27,6 +27,11 @@ In this project, we will investigate the powerful of salient object detection in
 CVP/
 ├── scripts/ - bash script to experiments
 |
+├── configs/ - training config
+|   ├── README.md - config name style
+│   ├── u2net/README.md - abstract and experiment results U^2-Net
+│   └── dis/README.md - abstract and experiment results DIS
+|
 ├── tools/ - script to training, testing, inference and web interface
 |
 ├── trainer/ - trainer classes 
@@ -35,8 +40,6 @@ CVP/
 |
 ├── base/ - abstract base classes
 │   
-├── configs/ - training config
-│
 ├── data/ - storing input data
 |
 ├── data_loader/ - custom dataset and dataloader
