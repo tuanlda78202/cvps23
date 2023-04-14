@@ -193,8 +193,6 @@ python tools/app.py
 | IS-Net baseline: (a) shows the image segmentation component, (b) illustrates the ground truth encoder built upon the intermediate supervision (IS) component.|
 
 ## Citations 
-This project is based on previous work by [victoresque](https://github.com/victoresque) on [PyTorch Template](https://github.com/victoresque/pytorch-template).
-
 ```bash
 @InProceedings{Qin_2020_PR,
       title = {U2-Net: Going Deeper with Nested U-Structure for Salient Object Detection},
@@ -212,6 +210,7 @@ This project is based on previous work by [victoresque](https://github.com/victo
       year={2022}
 }
 ```
+This project is based on previous work by [victoresque](https://github.com/victoresque) on [PyTorch Template](https://github.com/victoresque/pytorch-template).
 
 ## Contributors 
 <!-- https://contrib.rocks/preview?repo=tuanlda78202%2FCVP -->
