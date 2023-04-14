@@ -1,4 +1,9 @@
 # Salient Object Detection for Korean Name Card
+
+| ![DIS-R](https://github.com/tuanlda78202/CVP/blob/main/assets/result-dis.png) | 
+|:--:| 
+| |
+
 This is the source code for the project "Salient Object Detection for Korean Name Card" of the course "Computer Vision" Summer 2023.
 - [Salient Object Detection for Korean Name Card](#salient-object-detection-for-korean-name-card)
   - [Abstract](#abstract)
@@ -10,6 +15,9 @@ This is the source code for the project "Salient Object Detection for Korean Nam
     - [Evaluating](#evaluating)
     - [Inference](#inference)
     - [Web Interface](#web-interface)
+  - [Architectures](#architectures)
+    - [U^2-Net](#u2-net)
+    - [DIS](#dis)
   - [Contributors](#contributors)
 ## Abstract 
 Currently, existing image segmentation tasks mainly focus on segmenting objects with specific characteristics, e.g., salient, camouflaged, meticulous, or specific categories. Most of them have the same input/output formats, and barely use exclusive mechanisms designed for segmenting targets in their models, which means almost all tasks are dataset-dependent. Thus, it is very promising to formulate a category-agnostic DIS task for accurately segmenting objects with different structure complexities, regardless of their characteristics. Compared with semantic segmentation, the proposed DIS task usually focuses on images with single or a few targets, from which getting richer accurate details of each target is more feasible. 
@@ -174,6 +182,18 @@ Running demo on notebook `inference.ipynb` in [![Open In Colab](https://colab.re
 ```bash
 python tools/app.py
 ```
+## Architectures
+### [U^2-Net](https://arxiv.org/abs/2005.09007)
+
+| ![U2Net](https://github.com/tuanlda78202/CVP/blob/main/assets/u2net-arch.png) | 
+|:--:| 
+| Illustration of U2-Net architecture. The main architecture is a U-Net like Encoder-Decoder, where each stage consists of newly proposed residual U-block (RSU).|
+
+### [DIS](https://arxiv.org/abs/2203.03041)
+
+| ![DIS](https://github.com/tuanlda78202/CVP/blob/main/assets/dis-arch.png) | 
+|:--:| 
+| IS-Net baseline: (a) shows the image segmentation component, (b) illustrates the ground truth encoder built upon the intermediate supervision (IS) component.|
 
 ## Contributors 
 <!-- https://contrib.rocks/preview?repo=tuanlda78202%2FCVP -->
