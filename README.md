@@ -1,11 +1,8 @@
 # Salient Object Detection for Korean Name Card
-
 This is the source code for the project "Salient Object Detection for Korean Name Card" of the course "Computer Vision" Summer 2023.
-
-In this project, we will investigate the powerful of salient object detection in the real world by experimenting it over a various methods to see whether and how it works with Korean Name Card dataset.
-
 - [Salient Object Detection for Korean Name Card](#salient-object-detection-for-korean-name-card)
-  - [Project Structure](#project-structure)
+  - [Abstract](#abstract)
+  - [Folder Structure](#folder-structure)
   - [Usage](#usage)
     - [Config file format](#config-file-format)
     - [Using config files](#using-config-files)
@@ -13,12 +10,14 @@ In this project, we will investigate the powerful of salient object detection in
     - [Evaluating](#evaluating)
     - [Inference](#inference)
     - [Web Interface](#web-interface)
-  - [Collaborators](#collaborators)
-  - [Contribute](#contribute)
+  - [Contributors](#contributors)
+## Abstract 
+Currently, existing image segmentation tasks mainly focus on segmenting objects with specific characteristics, e.g., salient, camouflaged, meticulous, or specific categories. Most of them have the same input/output formats, and barely use exclusive mechanisms designed for segmenting targets in their models, which means almost all tasks are dataset-dependent. Thus, it is very promising to formulate a category-agnostic DIS task for accurately segmenting objects with different structure complexities, regardless of their characteristics. Compared with semantic segmentation, the proposed DIS task usually focuses on images with single or a few targets, from which getting richer accurate details of each target is more feasible. 
 
-<!-- /code_chunk_output -->
+In this project, we will investigate the powerful of salient object detection in the real world by experimenting it over a various methods to see whether and how it works with Korean Name Card dataset.
 
-## Project Structure
+
+## Folder Structure
 
 ```
 CVP/
@@ -176,13 +175,8 @@ Running demo on notebook `inference.ipynb` in [![Open In Colab](https://colab.re
 python tools/app.py
 ```
 
-## Collaborators 
-| Name                         | Student ID       | Email                                      |
-| :---                         |    :----:        |          :---:                             |
-| Le Duc Anh Tuan              | 20204929         | tuan.lda204929@sis.hust.edu.vn            |
-| Nguyen Van Thanh Tung             | 20190090         | tung.nvt190090@sis.hust.edu.vn            |
-
-## <div align="left">Contribute</div>
+## Contributors 
+<!-- https://contrib.rocks/preview?repo=tuanlda78202%2FCVP -->
 
 <a href="https://github.com/tuanlda78202/CVP/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=tuanlda78202/CVP" />
