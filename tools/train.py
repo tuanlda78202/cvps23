@@ -11,6 +11,7 @@ from trainer import Trainer
 import warnings
 import sys
 import os 
+
 # export PYTHONPATH="${PYTHONPATH}:/cvps23"
 warnings.filterwarnings("ignore")
 
@@ -36,6 +37,8 @@ def main(config):
 
     # Device GPU training
     device = "mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu")
+    # CPU 
+    device = "cpu"
     model = model.to(device)
 
     # Loss & Metrics

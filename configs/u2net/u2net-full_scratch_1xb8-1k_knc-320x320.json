@@ -34,7 +34,7 @@
 
 
     "metrics": [
-      "pixel_accuracy", "dice", "precision", "recall"
+      "fm", "mae", "wfm", "sm"
     ],
 
 
