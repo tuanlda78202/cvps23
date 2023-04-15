@@ -2,11 +2,11 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
-from model.metric import maxfm, mae, wfm, sm
+from model.metric import mae, sm
 from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb
-import py_sod_metrics
+import gc
 
 
 class Trainer(BaseTrainer):
@@ -85,23 +85,19 @@ class Trainer(BaseTrainer):
             map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
             # If CUDA 
             # map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
-            log_maxfm = maxfm(map_np, mask_np)
+            #log_maxfm = maxfm(map_np, mask_np)
             log_mae = mae(map_np, mask_np)
-            log_wfm = wfm(map_np, mask_np)
+            #log_wfm = wfm(map_np, mask_np)
             log_sm = sm(map_np, mask_np)
             
             # Progress bar
             tqdm_batch.set_postfix(loss=log_loss,
-                                   fm=log_maxfm,
                                    mae=log_mae,
-                                   wfm=log_wfm,
                                    sm=log_sm)
             
             # WandB            
             wandb.log({"loss": log_loss, 
-                        "fm": log_maxfm,
                         "mae": log_mae,
-                        "wfm": log_wfm,
                         "sm": log_sm})
             
             # Logging 
@@ -125,13 +121,38 @@ class Trainer(BaseTrainer):
         log = self.train_metrics.result()
 
         if self.do_validation:
-            val_log = self._valid_epoch(epoch)
+            #val_log = self._valid_epoch(epoch)
+            val_log = self._validnb_epoch(epoch)
             log.update(**{'val_'+k : v for k, v in val_log.items()})
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
         return log
 
+    def _validnb_epoch(self, epoch):
+        """
+        Valid for each image, tracking WandB
+        """
+        self.model.eval()
+        self.valid_metrics.reset()
+        
+        with torch.no_grad():
+            # Just for CUDA 
+            data = self.data_loader["img"].to(device=self.device, dtype=torch.cuda.FloatTensor)
+            mask = self.data_loader["mask"].to(device=self.device, dtype=torch.cuda.FloatTensor)
+            
+            
+            img, mask = next(iter(self.data_loader))
+            
+            x_map, list_maps = self.model(img)
+            
+            self.writer.set_step(epoch, 'valid')
+            
+            #images = wandb.Image(make_grid(img[:32], nrow=8))
+
+            wandb.Image(img,masks={"predictions" : {"mask_data" : x_map}})
+
+    
     def _valid_epoch(self, epoch):
         """
         Validate after training an epoch
