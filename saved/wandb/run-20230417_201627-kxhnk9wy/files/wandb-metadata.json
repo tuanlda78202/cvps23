@@ -1,0 +1,34 @@
+{
+    "os": "macOS-13.2-arm64-arm-64bit",
+    "python": "3.8.16",
+    "heartbeatAt": "2023-04-17T13:16:28.602371",
+    "startedAt": "2023-04-17T13:16:27.131604",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "tools/train.py",
+    "codePath": "tools/train.py",
+    "git": {
+        "remote": "https://github.com/tuanlda78202/CVP.git",
+        "commit": "a04c8d7cac0e5caeb209d54143c9568ff66c471c"
+    },
+    "email": "tuan.lda204929@sis.hust.edu.vn",
+    "root": "/Users/charles/cvps23",
+    "host": "Charless-MacBook-Pro.local",
+    "username": "charles",
+    "executable": "/Users/charles/torch-mps/env/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "disk": {
+        "total": 228.27386474609375,
+        "used": 163.10250091552734
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 8.0
+    }
+}

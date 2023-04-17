@@ -35,8 +35,8 @@ class Trainer(BaseTrainer):
         self.log_step = int(np.sqrt(data_loader.batch_size))
         
         # DataFrame metrics 
-        self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], track=self.track)
+        self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], track=self.track)
 
     def _train_epoch(self, epoch):
         """
@@ -101,17 +101,16 @@ class Trainer(BaseTrainer):
                         "sm": log_sm})
             
             # Logging 
-            self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
+            self.track.set_step((epoch - 1) * self.len_epoch + batch_idx)
             self.train_metrics.update('loss', log_loss)
             
             for met in self.metric_ftns:
                 self.train_metrics.update(met.__name__, met(map_np, mask_np))
 
             if batch_idx % self.log_step == 0:
-                self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(epoch,
-                                                                           self._progress(batch_idx),
-                                                                           loss.item()))
-                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+                self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(epoch, self._progress(batch_idx), loss.item()))
+                
+                self.track.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
             if batch_idx == self.len_epoch:
                 break
@@ -121,38 +120,14 @@ class Trainer(BaseTrainer):
         log = self.train_metrics.result()
 
         if self.do_validation:
-            #val_log = self._valid_epoch(epoch)
-            val_log = self._validnb_epoch(epoch)
+            val_log = self._valid_epoch(epoch)
             log.update(**{'val_'+k : v for k, v in val_log.items()})
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
         return log
 
-    def _validnb_epoch(self, epoch):
-        """
-        Valid for each image, tracking WandB
-        """
-        self.model.eval()
-        self.valid_metrics.reset()
-        
-        with torch.no_grad():
-            # Just for CUDA 
-            data = self.data_loader["img"].to(device=self.device, dtype=torch.cuda.FloatTensor)
-            mask = self.data_loader["mask"].to(device=self.device, dtype=torch.cuda.FloatTensor)
-            
-            
-            img, mask = next(iter(self.data_loader))
-            
-            x_map, list_maps = self.model(img)
-            
-            self.writer.set_step(epoch, 'valid')
-            
-            #images = wandb.Image(make_grid(img[:32], nrow=8))
 
-            wandb.Image(img,masks={"predictions" : {"mask_data" : x_map}})
-
-    
     def _valid_epoch(self, epoch):
         """
         Validate after training an epoch
@@ -189,17 +164,35 @@ class Trainer(BaseTrainer):
                 # map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
                 
                 # Logging
-                self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
+                self.track.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
                 self.valid_metrics.update('loss', loss.item())
                 
                 for met in self.metric_ftns:
                     self.valid_metrics.update(met.__name__, met(map_np, mask_np))
-                    
-                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+                
+                # Log WandB 
+                images = wandb.Image(make_grid(x_map[:32], nrow=8))
+                self.track.log({'predicted': images}, step=None)
+                del images
+                gc.collect()
+                #self.track.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+        
+        # Add original + gt
+        original, gt = next(iter(self.data_loader))
+        
+        self.writer.set_step(epoch, 'valid')
+        
+        original = wandb.Image(make_grid(original[:32], nrow=8))
+        gt = wandb.Image(make_grid(gt[:32], nrow=8))
+        
+        self.writer.log({'original': original, "gt":gt}, step=None)
+        del original, gt
+        
+        gc.collect()
 
-        # Add histogram of model parameters to the Tensorboard
+        # Add histogram of model parameters to the WandB
         for name, p in self.model.named_parameters():
-            self.writer.add_histogram(name, p, bins='auto')
+            self.track.add_histogram(name, p, bins='auto')
             
         return self.valid_metrics.result()
 
@@ -212,5 +205,3 @@ class Trainer(BaseTrainer):
             current = batch_idx
             total = self.len_epoch
         return base.format(current, total, 100.0 * current / total)
-
-

@@ -51,7 +51,6 @@ trainer:
 
   visual_tool: wandb
   project: cvps23
-  name: U2NetLite_scratch_1gpu-bs4_KNC_size320x320
 
   # Edit *username for tracking WandB multi-accounts
   api_key_file: ./configs/api-key/tuanlda78202

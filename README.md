@@ -46,7 +46,7 @@ cvps23/
 │
 ├── saved/ - trained models config, log-dir and logging output
 │
-├── logger/ - module for tensorboard/wandb visualization and logging
+├── logger/ - module for wandb visualization and logging
 |
 ├── utils/ - utility functions
 ```

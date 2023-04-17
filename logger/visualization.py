@@ -10,6 +10,7 @@ class WandB():
     """
     
     def __init__(self, name, cfg_trainer, logger, visual_tool, visualize_config=None):
+        
         self.writer = None
         self.selected_module = ""
         self.name = "wandb"
@@ -63,7 +64,7 @@ class WandB():
     def __getattr__(self, name):
         """
         If visualization is configured to use:
-            return add_data() methods of TensorBoard with additional information (step, tag) added.
+            return add_data() methods of WandB with additional information (step, tag) added.
         Otherwise:
             return a blank function handle that does nothing
         """

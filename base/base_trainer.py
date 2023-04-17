@@ -1,7 +1,7 @@
 import torch
 from abc import abstractmethod
 from numpy import inf
-from logger import TensorboardWriter, WandB
+from logger import WandB
 
 '''
 - Training process logging
@@ -52,15 +52,12 @@ class BaseTrainer:
 
         # Setup visualization writer instance       
                  
-        if cfg_trainer['visual_tool'] in ['tensorboard', 'tensorboardX']:
-            self.writer = TensorboardWriter(config.log_dir, self.logger, cfg_trainer['visual_tool'])
-            
-        elif cfg_trainer['visual_tool'] == 'wandb':
+        if cfg_trainer['visual_tool'] == 'wandb':
             visual_config = {"Architecture": config['arch']['type'], "trainer": cfg_trainer["type"]}
-            self.writer = WandB(config['name'], cfg_trainer, self.logger, cfg_trainer['visual_tool'], visualize_config=visual_config)
+            self.track = WandB(config['name'], cfg_trainer, self.logger, cfg_trainer['visual_tool'], visualize_config=visual_config)
             
         elif cfg_trainer['visual_tool'] == "None":
-            self.writer = None
+            self.track = None
             
         else:
             raise ImportError("Visualization tool isn't exists, please refer to comment 1.* "
@@ -121,9 +118,10 @@ class BaseTrainer:
 
             if epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=best)
-                
-        if self.writer is not None and self.writer.name == "wandb":
-            self.writer.writer.finish()
+        
+        # self.track: WandB Class  -> self.track.write: WandB Library  
+        if self.track is not None and self.track.name == "wandb":
+            self.track.writer.finish()
             
 
     def _save_checkpoint(self, epoch, save_best=False):
