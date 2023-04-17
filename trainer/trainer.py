@@ -1,3 +1,11 @@
+# ENV
+import sys, os, logging
+# os.environ["WANDB_SILENT"] = "True"
+# os.environ['WANDB_MODE'] = 'offline'
+logger = logging.getLogger("wandb")
+logger.setLevel(logging.ERROR)
+logger.setLevel(logging.WARNING)
+
 import numpy as np
 import torch
 from torchvision.utils import make_grid
@@ -7,7 +15,6 @@ from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb
 import gc
-
 
 class Trainer(BaseTrainer):
     """
@@ -74,7 +81,7 @@ class Trainer(BaseTrainer):
             # x_map for metrics, list_maps for loss 
             x_map, list_maps = self.model(data)
             
-            loss0, loss = self.criterion(list_maps, mask)            
+            loss = self.criterion(list_maps, mask)            
             loss.backward()
             self.optimizer.step()
 
@@ -82,12 +89,15 @@ class Trainer(BaseTrainer):
             log_loss = loss.item()
             
             # Metrics, detach tensor auto-grad to numpy
-            map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
-            # If CUDA 
-            #map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
-            #log_maxfm = maxfm(map_np, mask_np)
+            if self.device == "cuda":
+                map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
+            else:
+                map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
+                
+            # Metrics 
+            # log_maxfm, log_wfm = maxfm(map_np, mask_np), wfm(map_np, mask_np)
+            
             log_mae = mae(map_np, mask_np)
-            #log_wfm = wfm(map_np, mask_np)
             log_sm = sm(map_np, mask_np)
             
             # Progress bar
@@ -110,8 +120,6 @@ class Trainer(BaseTrainer):
             if batch_idx % self.log_step == 0:
                 self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(epoch, self._progress(batch_idx), loss.item()))
                 
-                self.track.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
-
             if batch_idx == self.len_epoch:
                 break
             
@@ -125,6 +133,7 @@ class Trainer(BaseTrainer):
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
+            
         return log
 
 
@@ -156,12 +165,13 @@ class Trainer(BaseTrainer):
                 
                 # Forward 
                 x_map, list_maps = self.model(data)
-                loss0, loss = self.criterion(list_maps, mask)      
+                loss = self.criterion(list_maps, mask)      
 
                 # Metrics, detach tensor auto-grad to numpy
-                map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
-                # If CUDA 
-                #map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
+                if self.device == "cuda":
+                    map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
+                else:
+                    map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
                 
                 # Logging
                 self.track.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
@@ -170,9 +180,11 @@ class Trainer(BaseTrainer):
                 for met in self.metric_ftns:
                     self.valid_metrics.update(met.__name__, met(map_np, mask_np))
                 
-                # Log WandB 
-                images = wandb.Image(make_grid(x_map[:32], nrow=8))
+                # Log WandB, Predicted will show first
+                images = wandb.Image(make_grid(x_map[:8], nrow=4))
                 self.track.log({'Predicted': images}, step=None)
+                
+                # Delete garbage
                 del images
                 gc.collect()
         
@@ -181,12 +193,15 @@ class Trainer(BaseTrainer):
         
         self.track.set_step(epoch, 'valid')
         
-        original = wandb.Image(make_grid(loader["img"][:32], nrow=8))
-        gt = wandb.Image(make_grid(loader["mask"][:32], nrow=8))
+        # Grid 2 x 4 
+        original = wandb.Image(make_grid(loader["img"][:8], nrow=4))
+        gt = wandb.Image(make_grid(loader["mask"][:8], nrow=4))
         
-        self.track.log({'Original': loader["img"], "Ground Truth": loader["mask"]}, step=None)
+        self.track.log({'Original': original}, step=None)
+        self.track.log({"Ground Truth": gt}, step=None)
+        
+        # Delete garbage
         del original, gt
-        
         gc.collect()
 
         # Add histogram of model parameters to the WandB

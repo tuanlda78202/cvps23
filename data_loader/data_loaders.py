@@ -1,3 +1,7 @@
+import sys, os 
+# export PYTHONPATH="${PYTHONPATH}:/cvps23"
+sys.path.append(os.getcwd())
+
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from base.base_data_loader import BaseDataLoader

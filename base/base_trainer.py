@@ -120,6 +120,8 @@ class BaseTrainer:
                 self._save_checkpoint(epoch, save_best=best)
         
         # self.track: WandB Class  -> self.track.write: WandB Library  
+        # Launch multiple runs from one script?​
+        # run.finish(): Use this at the end of your run to finish logging for that run
         if self.track is not None and self.track.name == "wandb":
             self.track.writer.finish()
             

@@ -19,4 +19,4 @@ def multi_bce_fusion(output, mask):
 
 	loss = loss0 + loss1 + loss2 + loss3 + loss4 + loss5 + loss6
 	 
-	return loss0, loss
+	return loss

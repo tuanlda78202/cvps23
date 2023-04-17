@@ -1,5 +1,4 @@
-import sys, os 
-# export PYTHONPATH="${PYTHONPATH}:/cvps23"
+import sys, os
 sys.path.append(os.getcwd())
 
 import argparse
