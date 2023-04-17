@@ -25,13 +25,12 @@ In this project, we will investigate the powerful of salient object detection in
 
 ```
 cvps23/
-├── scripts/ - bash script to experiments
-|
 ├── configs/ - training config
 |   ├── README.md - config name style
 │   ├── */README.md - abstract and experiment results model
+|   ├── api-key/ - wandb api key for monitoring
 |
-├── tools/ - script to training, testing, inference and web interface
+├── tools/ - script to downloading data, training, testing, inference and web interface
 |
 ├── trainer/ - trainer classes 
 |
@@ -75,7 +74,6 @@ Install the required packages:
 ```
 pip install -r requirements.txt
 ```
-<!-- export PYTHONPATH="${PYTHONPATH}:/cvps23" -->
 <!-- pipreqs for get requirements.txt -->
 
 Running private repository on Kaggle:
@@ -159,14 +157,14 @@ test:
 Modify the configurations in `.yaml` config files, then run:
 
 ```bash
-bash scripts/u2net_train.sh [CONFIG] [BATCH_SIZE] [EPOCHS]
+python tools/train.py [CONFIG] [RESUME] [DEVICE] [BATCH_SIZE] [EPOCHS]
 ```
 
 ### Resuming from checkpoints
 You can resume from a previously saved checkpoint by:
 
 ```bash
-bash scripts/u2net_train.sh --resume path/to/the/ckpt
+sh tools/train.py --resume path/to/the/ckpt
 ```
 
 ### Evaluating

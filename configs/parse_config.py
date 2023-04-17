@@ -1,4 +1,5 @@
-import os
+import sys, os
+from os import path
 import logging
 from pathlib import Path
 from functools import reduce, partial
@@ -6,7 +7,6 @@ from operator import getitem
 from datetime import datetime
 from logger import setup_logging
 from utils import load_yaml,write_yaml
-
 
 class ConfigParser:
     def __init__(self, config, resume=None, modification=None, run_id=None):
@@ -16,7 +16,7 @@ class ConfigParser:
         
         :param config: Dict containing configurations, hyper-parameters for training. contents of `config.yaml` file for example.
         :param resume: String, path to the checkpoint being loaded.
-        :param modification: Dict keychain:value, specifying position values to be replaced from config dict.
+        :param modification: Dict key-chain:value, specifying position values to be replaced from config dict.
         :param run_id: Unique Identifier for training processes. Used to save checkpoints and training log. Timestamp is being used as default
         """
         # load config file and apply modification
@@ -26,11 +26,11 @@ class ConfigParser:
         # set save_dir where trained model and log will be saved.
         save_dir = Path(self.config['trainer']['save_dir'])
 
-        exper_name = self.config['name']
+        exp_name = self.config['name']
         if run_id is None: # use timestamp as default run-id
             run_id = datetime.now().strftime(r'%m%d_%H%M%S')
-        self._save_dir = save_dir / 'models' / exper_name / run_id
-        self._log_dir = save_dir / 'log' / exper_name / run_id
+        self._save_dir = save_dir / 'models' / exp_name / run_id
+        self._log_dir = save_dir / 'log' / exp_name / run_id
 
         # make directory for saving checkpoints and log.
         exist_ok = run_id == ''
@@ -60,9 +60,11 @@ class ConfigParser:
 
         if args.device is not None:
             os.environ["CUDA_VISIBLE_DEVICES"] = args.device
+            
         if args.resume is not None:
             resume = Path(args.resume)
             cfg_fname = resume.parent / 'config.yaml'
+            
         else:
             msg_no_cfg = "Configuration file need to be specified. Add '-c config.yaml', for example."
             assert args.config is not None, msg_no_cfg
