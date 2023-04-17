@@ -2,17 +2,29 @@ import os
 import glob
 import json
 import torch
+import yaml
 import pandas as pd
 from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
-
+import yaml
 
 def ensure_dir(dirname):
     dirname = Path(dirname)
     if not dirname.is_dir():
         dirname.mkdir(parents=True, exist_ok=False)
 
+def load_yaml(fname):
+    fname = Path(fname)
+    with fname.open("rt") as file:
+        config = yaml.safe_load(file)
+    return config
+
+def write_yaml(content, fname):
+    fname = Path(fname)
+    with fname.open("wt") as handle:
+        yaml.dump(content, handle, indent=4, sort_keys=False)
+        
 def read_json(fname):
     fname = Path(fname)
     with fname.open('rt') as handle:

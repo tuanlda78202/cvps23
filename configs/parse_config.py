@@ -5,16 +5,16 @@ from functools import reduce, partial
 from operator import getitem
 from datetime import datetime
 from logger import setup_logging
-from utils import read_json, write_json
+from utils import load_yaml,write_yaml
 
 
 class ConfigParser:
     def __init__(self, config, resume=None, modification=None, run_id=None):
         """
-        class to parse configuration json file. Handles hyper-parameters for training, initializations of modules, checkpoint saving
+        class to parse configuration yaml file. Handles hyper-parameters for training, initializations of modules, checkpoint saving
         and logging module.
         
-        :param config: Dict containing configurations, hyper-parameters for training. contents of `config.json` file for example.
+        :param config: Dict containing configurations, hyper-parameters for training. contents of `config.yaml` file for example.
         :param resume: String, path to the checkpoint being loaded.
         :param modification: Dict keychain:value, specifying position values to be replaced from config dict.
         :param run_id: Unique Identifier for training processes. Used to save checkpoints and training log. Timestamp is being used as default
@@ -38,7 +38,7 @@ class ConfigParser:
         self.log_dir.mkdir(parents=True, exist_ok=exist_ok)
 
         # save updated config file to the checkpoint dir
-        write_json(self.config, self.save_dir / 'config.json')
+        write_yaml(self.config, self.save_dir / 'config.yaml')
 
         # configure logging module
         setup_logging(self.log_dir)
@@ -62,17 +62,18 @@ class ConfigParser:
             os.environ["CUDA_VISIBLE_DEVICES"] = args.device
         if args.resume is not None:
             resume = Path(args.resume)
-            cfg_fname = resume.parent / 'config.json'
+            cfg_fname = resume.parent / 'config.yaml'
         else:
-            msg_no_cfg = "Configuration file need to be specified. Add '-c config.json', for example."
+            msg_no_cfg = "Configuration file need to be specified. Add '-c config.yaml', for example."
             assert args.config is not None, msg_no_cfg
             resume = None
             cfg_fname = Path(args.config)
         
-        config = read_json(cfg_fname)
+        config = load_yaml(cfg_fname)
+        
         if args.config and resume:
             # update new config for fine-tuning
-            config.update(read_json(args.config))
+            config.update(load_yaml(args.config))
 
         # parse custom cli options into dictionary
         modification = {opt.target : getattr(args, _get_opt_name(opt.flags)) for opt in options}

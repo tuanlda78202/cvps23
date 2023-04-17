@@ -31,7 +31,7 @@ class WandB():
             # Install 
             if not succeeded:
                 message = "Warning: visualization (WandB) is configured to use, but currently not installed on this " \
-                          "machine. Please install WandB with 'pip install wandb', set the option in the 'config.json' file."
+                          "machine. Please install WandB with 'pip install wandb', set the option in the 'config.yaml' file."
                           
                 logger.warning(message)
 
@@ -100,7 +100,7 @@ class TensorboardWriter():
             if not succeeded:
                 message = "Warning: visualization (Tensorboard) is configured to use, but currently not installed on " \
                     "this machine. Please install TensorboardX with 'pip install tensorboardx', upgrade PyTorch to " \
-                    "version >= 1.1 to use 'torch.utils.tensorboard' or turn off the option in the 'config.json' file."
+                    "version >= 1.1 to use 'torch.utils.tensorboard' or turn off the option in the 'config.yaml' file."
                 logger.warning(message)
 
         self.step = 0

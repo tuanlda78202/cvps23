@@ -1,7 +1,7 @@
 # Salient Object Detection for Korean Name Card
 ![DIS-R](https://github.com/tuanlda78202/CVP/blob/main/assets/result-dis.png)
 
-This is the source code for the project "Salient Object Detection for Korean Name Card" of the course "Computer Vision" Summer 2023.
+This is the source code of the project "Salient Object Detection for Korean Name Card" of the course "Computer Vision" Summer 2023.
 
 ---
 - [Salient Object Detection for Korean Name Card](#salient-object-detection-for-korean-name-card)
@@ -88,93 +88,72 @@ cd CVP
 ### Config file format
 
 <details>
-<summary>Config files are in JSON format</summary>
+<summary>Config files are in YAML format</summary>
 
-```javascript
-{
-    "name": "U2NetFull_scratch_1gpu-bs8_KNC_size512",
-    "n_gpu": 1,
+```yaml
+name: U2NetFull_scratch_1gpu-bs4_KNC_size320x320
+
+n_gpu: 1
+
+arch:
+  type: u2net_full
+  args: {}
+
+data_loader:
+  type: KNC_DataLoader
+  args:
+    batch_size: 4
+    shuffle: true
+    num_workers: 1
+    validation_split: 0.1
+    output_size: 320
+    crop_size: 288
+
+optimizer:
+  type: Adam
+  args:
+    lr: 0.001
+    weight_decay: 0
+    eps: 1.e-8
+    betas:
+      - 0.9
+      - 0.999
+
+loss: multi_bce_fusion
+
+metrics:
+  - mae
+  - sm
+
+lr_scheduler:
+  type: StepLR
+  args:
+    step_size: 50
+    gamma: 0.1
+
+trainer:
+  type: Trainer
+  epochs: 1000
+  save_dir: saved/
+  save_period: 10
+  verbosity: 1
+  visual_tool: wandb
+  api_key_file: ./configs/wandb-api-key-file
+  project: cvps23
+  entity: tuanlda78202
+  name: U2NetFull_scratch_1gpu-bs4_KNC_size320x320
   
-    "arch": {
-      "type": "u2net_full",
-      "args": {}
-    },
+test:
+  save_dir: saved/generated
+  n_sample: 1000
+  batch_size: 32
 
-    "data_loader": {
-      "type": "KNC_DataLoader",
-      "args": {
-        "batch_size": 8,
-        "shuffle": true,
-        "num_workers": 1,
-        "validation_split": 0.1,
-        "output_size": 320,
-        "crop_size": 288
-      }
-    },
-  
-    "optimizer": {
-      "type": "Adam",
-      "args": {
-        "lr": 1e-3,
-        "weight_decay": 0,
-        "eps": 1e-08,
-        "betas": [0.9, 0.999]
-      }
-    },
-
-    
-    "loss": "multi_bce_fusion",
-
-
-    "metrics": [
-      "pixel_accuracy", "dice", "precision", "recall"
-    ],
-
-
-    "lr_scheduler": {
-      "type": "StepLR",
-      "args": {
-        "step_size": 50,
-        "gamma": 0.1
-      }
-    },
-
-
-    "trainer": {
-      "type": "Trainer",
-  
-      "epochs": 50,
-
-      "save_dir": "saved/",
-      "save_period": 5,
-      "verbosity": 1,
-  
-      "tensorboard": false,
-      "visual_tool": "wandb",
-      "__comment_1.1": "torch.utils.tensorboard",
-      "__comment_1.2": "tensorboardX",
-      "__comment_1.3": "wandb",
-      "__comment_1.4": "None",
-      "api_key_file": "./wandb-api-key-file",
-      "project": "knc",
-      "entity": "cvp-knc",
-      "name": "test",
-      "__comment_2.1": "Set name for one running"
-    },
-
-
-    "test": {
-      "save_dir": "saved/generated",
-      "n_sample": 2000,
-      "batch_size": 32
-    }
-}
 ```
 
 </details>
 
 ### Using config files
-Modify the configurations in `.json` config files, then run:
+Modify the configurations in `.yaml` config files, then run:
 
 ```bash
 bash scripts/u2net_train.sh [CONFIG] [BATCH_SIZE] [EPOCHS]

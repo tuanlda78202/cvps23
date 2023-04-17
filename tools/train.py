@@ -65,14 +65,14 @@ def main(config):
 if __name__ == '__main__':
     
     args = argparse.ArgumentParser(description='Salient Object Detection')
-    args.add_argument('-c', '--config', default="configs/u2net/u2net-lite_scratch_1xb8-1k_knc-320x320.json", type=str,
+    args.add_argument('-c', '--config', default="configs/u2net/u2net-lite_scratch_1xb8-1k_knc-320x320.yaml", type=str,
                       help='config file path (default: None)')
     args.add_argument('-r', '--resume', default=None, type=str,
                       help='path to latest checkpoint (default: None)')
     args.add_argument('-d', '--device', default="mps", type=str,
                       help='indices of GPUs to enable (default: all)')
 
-    # Custom CLI options to modify configuration from default values given in json file.
+    # Custom CLI options to modify configuration from default values given in yaml file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
     options = [
         CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader;args;batch_size'),

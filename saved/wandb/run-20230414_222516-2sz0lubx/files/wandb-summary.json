@@ -1,1 +1,0 @@
-{"loss": 4.058701515197754, "pixel_accuracy": Infinity, "dice": 1.5232060438495674e-10, "precision": 1.0, "recall": 1.5232060438495674e-10, "_timestamp": 1681485942.6691241, "_runtime": 25.976126194000244, "_step": 1, "_wandb": {"runtime": 26}}

@@ -2,7 +2,7 @@
 
 export PYTHONPATH="${PYTHONPATH}:/cvps23"
 
-CONFIG= "configs/u2net/u2net-lite_scratch_1xb8-1k_knc-512x512.json"
+CONFIG= "configs/u2net/u2net-lite_scratch_1xb4-1k_knc-320x320.yaml"
 RESUME = None 
 BS = 2
 EP = 1 
