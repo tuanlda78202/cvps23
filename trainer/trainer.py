@@ -84,7 +84,7 @@ class Trainer(BaseTrainer):
             # Metrics, detach tensor auto-grad to numpy
             map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
             # If CUDA 
-            # map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
+            #map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
             #log_maxfm = maxfm(map_np, mask_np)
             log_mae = mae(map_np, mask_np)
             #log_wfm = wfm(map_np, mask_np)
@@ -161,7 +161,7 @@ class Trainer(BaseTrainer):
                 # Metrics, detach tensor auto-grad to numpy
                 map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
                 # If CUDA 
-                # map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
+                #map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
                 
                 # Logging
                 self.track.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
@@ -172,20 +172,19 @@ class Trainer(BaseTrainer):
                 
                 # Log WandB 
                 images = wandb.Image(make_grid(x_map[:32], nrow=8))
-                self.track.log({'predicted': images}, step=None)
+                self.track.log({'Predicted': images}, step=None)
                 del images
                 gc.collect()
-                #self.track.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
         
-        # Add original + gt
-        original, gt = next(iter(self.data_loader))
+        # WandB Log Original + GT
+        loader = next(iter(self.data_loader))
         
-        self.writer.set_step(epoch, 'valid')
+        self.track.set_step(epoch, 'valid')
         
-        original = wandb.Image(make_grid(original[:32], nrow=8))
-        gt = wandb.Image(make_grid(gt[:32], nrow=8))
+        original = wandb.Image(make_grid(loader["img"][:32], nrow=8))
+        gt = wandb.Image(make_grid(loader["mask"][:32], nrow=8))
         
-        self.writer.log({'original': original, "gt":gt}, step=None)
+        self.track.log({'Original': loader["img"], "Ground Truth": loader["mask"]}, step=None)
         del original, gt
         
         gc.collect()

@@ -9,6 +9,7 @@ arch:
 data_loader:
   type: KNC_DataLoader
   args:
+    # bs20 ~ 14GB RAM
     batch_size: 4
     shuffle: true
     num_workers: 1
