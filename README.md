@@ -133,21 +133,24 @@ lr_scheduler:
 
 trainer:
   type: Trainer
+
   epochs: 1000
   save_dir: saved/
   save_period: 10
   verbosity: 1
+
   visual_tool: wandb
-  api_key_file: ./configs/wandb-api-key-file
   project: cvps23
+  name: U2NetLite_scratch_1gpu-bs4_KNC_size320x320
+
+  # Edit *username for tracking WandB multi-accounts
+  api_key_file: ./configs/api-key/tuanlda78202
   entity: tuanlda78202
-  name: U2NetFull_scratch_1gpu-bs4_KNC_size320x320
   
 test:
   save_dir: saved/generated
   n_sample: 1000
   batch_size: 32
-
 ```
 
 </details>
