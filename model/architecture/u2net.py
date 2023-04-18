@@ -41,13 +41,12 @@ class U2Net(nn.Module):
                 
         # Fuse Layer
         self.add_module("out_conv2d", Conv2d(int(self.height * self.out_channel), self.out_channel, kernel_size=1))
-        self.add_module("maps1x1_conv2d", Conv2d(in_channels=7, out_channels=1, kernel_size=1))
         
     def forward(self, x):
         sizes = _size_map(x, self.height)
         maps = []  # storage for list maps
 
-        # Side saliency map
+        # Side 6 saliency maps
         def unet(x, height=1):
             if height < 6:
                 x1 = getattr(self, f'stage{height}')(x)
@@ -64,37 +63,43 @@ class U2Net(nn.Module):
                 side(x, height)
                 
                 return _up_same(x, sizes[height - 1])
-
+        
         def side(x, h):
-            # side output saliency map (before sigmoid)
+            
+            # Generates six side output salience probability maps by conv 3x3
             x = getattr(self, f'side{h}')(x)
+            
+            # Up-sample the logits (conv outputs before sigmoid functions) of the side output saliency maps 
+            # to the input image size
             x = _up_same(x, sizes[1])
             maps.append(x)
 
+        # Fuse 6 saliency maps + Outconv 
         def fuse(x):
-            # fuse saliency probability maps
+
+            # Fuse with a concatenation operation followed by a 1×1 convolution layer
+            
+            # Reverse for add d0 first
             maps.reverse()
             x = torch.cat(maps, dim=1)
-            x = getattr(self, 'out_conv2d')(x)
-            maps.insert(0, x)
+            
+            # x_fuse = con1x1 6 saliency maps
+            x_fuse = getattr(self, 'out_conv2d')(x)
+            maps.insert(0, x_fuse)
 
+            # List d0 & Decoder
             list_maps = [torch.sigmoid(x) for x in maps]
 
-            return list_maps
+            return x_fuse, list_maps
         
         # U-Net x 
         x_unet = unet(x)
         
         # List feature maps 
-        list_maps = fuse(x_unet)
-        
-        # Conv1x1 for one feature map
-        x_map = torch.cat(maps, dim=1)
-        x_map = getattr(self, 'maps1x1_conv2d')(x_map)
-        x_map = F.sigmoid(x_map)
-        
+        x_fuse, list_maps = fuse(x_unet)
+    
         # x_map for metrics, list_maps for loss 
-        return x_map, list_maps
+        return x_fuse, list_maps
 
 # Config for building RSUs and sides
 # {stage : [name, (height(L), in_ch, mid_ch, out_ch, dilated), side]}
@@ -106,9 +111,16 @@ def u2net_full():
         'stage2': ['En_2', (6, 64, 32, 128), -1],
         'stage3': ['En_3', (5, 128, 64, 256), -1],
         'stage4': ['En_4', (4, 256, 128, 512), -1],
+        
+        # RSU-4F: “F” for dilated version
+        # All intermediate feature maps of RSU-4F have the same resolution with its input feature maps.
         'stage5': ['En_5', (4, 512, 256, 512, True), -1],
         'stage6': ['En_6', (4, 512, 256, 512, True), 512],
+        
+        # Each decoder stage takes the concatenation of the up-sampled feature maps from its previous stage 
+        # and those from its symmetrical encoder stage as the input,
         'stage5d': ['De_5', (4, 1024, 256, 512, True), 512],
+        
         'stage4d': ['De_4', (4, 1024, 128, 256), 256],
         'stage3d': ['De_3', (5, 512, 64, 128), 128],
         'stage2d': ['De_2', (6, 256, 32, 64), 64],
@@ -124,9 +136,16 @@ def u2net_lite():
         'stage2': ['En_2', (6, 64, 16, 64), -1],
         'stage3': ['En_3', (5, 64, 16, 64), -1],
         'stage4': ['En_4', (4, 64, 16, 64), -1],
+        
+        # RSU-4F: “F” for dilated version
+        # All intermediate feature maps of RSU-4F have the same resolution with its input feature maps.
         'stage5': ['En_5', (4, 64, 16, 64, True), -1],
         'stage6': ['En_6', (4, 64, 16, 64, True), 64],
+        
+        # Each decoder stage takes the concatenation of the up-sampled feature maps from its previous stage 
+        # and those from its symmetrical encoder stage as the input,
         'stage5d': ['De_5', (4, 128, 16, 64, True), 64],
+        
         'stage4d': ['De_4', (4, 128, 16, 64), 64],
         'stage3d': ['De_3', (5, 128, 16, 64), 64],
         'stage2d': ['De_2', (6, 128, 16, 64), 64],

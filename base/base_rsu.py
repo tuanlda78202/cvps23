@@ -77,16 +77,18 @@ class RSU(nn.Module):
             if height < self.height:
                 x1 = getattr(self, f"rbc{height}")(x)
             
-                # Check Down-sample
+                # Python recursion
                 if not self.dilated and height < self.height-1:
                     x2 = unet(getattr(self, "down_sample")(x1), height+1)
                 else:
                     x2 = unet(x1, height+1)
-            
+                
+                # Concatenation
                 x = getattr(self, f"rbc{height}d")(torch.cat((x2, x1), 1))
             
-                return _up_same(x, sizes[height-1]) if not self.dilated and height > 1 else x 
+                return _up_same(x, sizes[height-1]) if (not self.dilated and height > 1) else x 
             else:
                 return getattr(self, f"rbc{height}")(x)
-            
+        
+        # Addition
         return x + unet(x)

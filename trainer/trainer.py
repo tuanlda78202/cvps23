@@ -164,14 +164,14 @@ class Trainer(BaseTrainer):
                     mask = loader["mask"].to(device=self.device, dtype=torch.float32)
                 
                 # Forward 
-                x_map, list_maps = self.model(data)
+                x_fuse, list_maps = self.model(data)
                 loss = self.criterion(list_maps, mask)      
 
                 # Metrics, detach tensor auto-grad to numpy
                 if self.device == "cuda":
-                    map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
+                    map_np, mask_np = x_fuse.cpu().detach().numpy(), mask.cpu().detach().numpy()
                 else:
-                    map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
+                    map_np, mask_np = x_fuse.detach().numpy(), mask.detach().numpy()
                 
                 # Logging
                 self.track.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
@@ -181,7 +181,7 @@ class Trainer(BaseTrainer):
                     self.valid_metrics.update(met.__name__, met(map_np, mask_np))
                 
                 # Log WandB, Predicted will show first
-                images = wandb.Image(make_grid(x_map[:8], nrow=4))
+                images = wandb.Image(make_grid(x_fuse[:8], nrow=4))
                 self.track.log({'Predicted': images}, step=None)
                 
                 # Delete garbage
