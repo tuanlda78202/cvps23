@@ -95,9 +95,10 @@ class U2Net(nn.Module):
         # U-Net x 
         x_unet = unet(x)
         
-        # List feature maps 
+        # X_fuse sigmoid + List feature maps 
         x_fuse, list_maps = fuse(x_unet)
-    
+        x_fuse = F.sigmoid(x_fuse)
+        
         # x_map for metrics, list_maps for loss 
         return x_fuse, list_maps
 
