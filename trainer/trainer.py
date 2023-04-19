@@ -62,19 +62,15 @@ class Trainer(BaseTrainer):
         
         for batch_idx, loader in enumerate(tqdm_batch):            
             # Load to Device 
-            if self.device == "cuda":
+            if self.device == "cuda:0":
                 data = loader["img"].to(device=self.device, dtype=torch.cuda.FloatTensor)
                 mask = loader["mask"].to(device=self.device, dtype=torch.cuda.FloatTensor)
                 
-            elif self.device == "cpu":
+            else:
                 data = loader["img"].to(device=self.device)
                 data = data.type(torch.FloatTensor)
                 mask = loader["mask"].to(device=self.device)
                 mask = mask.type(torch.FloatTensor)
-                
-            else: # MPS 
-                data = loader["img"].to(device=self.device, dtype=torch.float32)
-                mask = loader["mask"].to(device=self.device, dtype=torch.float32)
  
             self.optimizer.zero_grad()
             
@@ -89,7 +85,7 @@ class Trainer(BaseTrainer):
             log_loss = loss.item()
             
             # Metrics, detach tensor auto-grad to numpy
-            if self.device == "cuda":
+            if self.device == "cuda:0":
                 map_np, mask_np = x_map.cpu().detach().numpy(), mask.cpu().detach().numpy()
             else:
                 map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
@@ -151,24 +147,20 @@ class Trainer(BaseTrainer):
             for batch_idx, loader in enumerate(self.valid_data_loader):
                 
                 # Load to Device 
-                if self.device == "cuda":
+                if self.device == "cuda:0":
                     data = loader["img"].to(device=self.device, dtype=torch.cuda.FloatTensor)
                     mask = loader["mask"].to(device=self.device, dtype=torch.cuda.FloatTensor)
                 
-                elif self.device == "cpu":
+                else:
                     data = loader["img"].to(device=self.device, dtype=torch.FloatTensor)
                     mask = loader["mask"].to(device=self.device, dtype=torch.FloatTensor)
-                
-                else: # MPS 
-                    data = loader["img"].to(device=self.device, dtype=torch.float32)
-                    mask = loader["mask"].to(device=self.device, dtype=torch.float32)
-                
+                            
                 # Forward 
                 x_fuse, list_maps = self.model(data)
                 loss = self.criterion(list_maps, mask)      
 
                 # Metrics, detach tensor auto-grad to numpy
-                if self.device == "cuda":
+                if self.device == "cuda:0":
                     map_np, mask_np = x_fuse.cpu().detach().numpy(), mask.cpu().detach().numpy()
                 else:
                     map_np, mask_np = x_fuse.detach().numpy(), mask.detach().numpy()

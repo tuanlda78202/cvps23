@@ -17,7 +17,8 @@ class KNC_DataLoader(BaseDataLoader):
         self.output_size = output_size
         self.crop_size = crop_size
         
-        self.img_list, self.mask_list = mask_image_list()
+        # data ~ 82k, data-demo ~ 1.6k 
+        self.img_list, self.mask_list = mask_image_list(dir="data")
         self.dataset = KNC_Dataset(self.img_list, self.mask_list,
                                    transform=transforms.Compose([Rescale(self.output_size),
                                                                  RandomCrop(self.crop_size),

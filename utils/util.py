@@ -8,6 +8,7 @@ from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
 import yaml
+from PIL import Image, ImageOps
 
 def ensure_dir(dirname):
     dirname = Path(dirname)
@@ -81,8 +82,9 @@ class MetricTracker:
     def result(self):
         return dict(self._data.average)
 
-def mask_image_list():
-    data_dir = os.path.join(os.getcwd(), 'data' + os.sep)
+# Make sure img & mask folder mapping same 
+def mask_image_list(dir):
+    data_dir = os.path.join(os.getcwd(), dir + os.sep)
     img_dir = os.path.join("img" + os.sep)
     mask_dir = os.path.join("mask" + os.sep)
     
@@ -122,3 +124,24 @@ def init_wandb(wandb_lib, project, entity, api_key_file='./configs/wandb-api-key
                           entity=entity,
                           name=name,
                           config=config)
+    
+# Padding 
+def padding(img, expected_size):
+    desired_size = expected_size
+    delta_width = desired_size[0] - img.size[0]
+    delta_height = desired_size[1] - img.size[1]
+    pad_width = delta_width // 2
+    pad_height = delta_height // 2
+    padding = (pad_width, pad_height, delta_width - pad_width, delta_height - pad_height)
+    return ImageOps.expand(img, padding)
+
+
+def resize_with_padding(img, expected_size):
+    img.thumbnail((expected_size[0], expected_size[1]))
+    # print(img.size)
+    delta_width = expected_size[0] - img.size[0]
+    delta_height = expected_size[1] - img.size[1]
+    pad_width = delta_width // 2
+    pad_height = delta_height // 2
+    padding = (pad_width, pad_height, delta_width - pad_width, delta_height - pad_height)
+    return ImageOps.expand(img, padding)

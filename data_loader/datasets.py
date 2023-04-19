@@ -217,4 +217,4 @@ class ToTensorLab(object):
 
 		tmpImg = tmpImg.transpose((2, 0, 1))
 
-		return {'img_idx':torch.from_numpy(img_idx), 'img': torch.from_numpy(tmpImg), 'mask': torch.from_numpy(tmpMask)}
+		return {'img_idx':torch.from_numpy(img_idx), 'img': torch.from_numpy(tmpImg.copy()), 'mask': torch.from_numpy(tmpMask.copy())}
