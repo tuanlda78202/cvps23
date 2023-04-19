@@ -35,10 +35,8 @@ def main(config):
     model = config.init_obj('arch', module_arch)
     logger.info(model)
 
-    # Device GPU training
-    device = "mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu")
-    # CPU 
-    device = "cpu"
+    # Device GPU training    
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
     model = model.to(device)
 
     # Loss & Metrics
