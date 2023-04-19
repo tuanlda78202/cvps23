@@ -64,7 +64,7 @@ if __name__ == '__main__':
     
     args = argparse.ArgumentParser(description='Salient Object Detection')
     
-    args.add_argument('-c', '--config', default="configs/u2net/u2net-lite_scratch_1xb4-1k_knc-320x320.yaml", type=str,
+    args.add_argument('-c', '--config', default="configs/u2net/u2net-full_scratch_1xb12-1k_knc-320x320.yaml", type=str,
                       help='config file path (default: None)')
     
     args.add_argument('-r', '--resume', default=None, type=str,

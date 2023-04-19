@@ -63,8 +63,10 @@ class Trainer(BaseTrainer):
         for batch_idx, loader in enumerate(tqdm_batch):            
             # Load to Device 
             if self.device == "cuda:0":
-                data = loader["img"].to(device=self.device, dtype=torch.cuda.FloatTensor)
-                mask = loader["mask"].to(device=self.device, dtype=torch.cuda.FloatTensor)
+                data = loader["img"].to(device=self.device)
+                data = data.type(torch.cuda.FloatTensor)
+                mask = loader["mask"].to(device=self.device)
+                mask = mask.type(torch.cuda.FloatTensor)
                 
             else:
                 data = loader["img"].to(device=self.device)
@@ -148,12 +150,16 @@ class Trainer(BaseTrainer):
                 
                 # Load to Device 
                 if self.device == "cuda:0":
-                    data = loader["img"].to(device=self.device, dtype=torch.cuda.FloatTensor)
-                    mask = loader["mask"].to(device=self.device, dtype=torch.cuda.FloatTensor)
+                    data = loader["img"].to(device=self.device)
+                    data = data.type(torch.cuda.FloatTensor)
+                    mask = loader["mask"].to(device=self.device)
+                    mask = mask.type(torch.cuda.FloatTensor)
                 
                 else:
-                    data = loader["img"].to(device=self.device, dtype=torch.FloatTensor)
-                    mask = loader["mask"].to(device=self.device, dtype=torch.FloatTensor)
+                    data = loader["img"].to(device=self.device)
+                    data = data.type(torch.FloatTensor)
+                    mask = loader["mask"].to(device=self.device)
+                    mask = mask.type(torch.FloatTensor)
                             
                 # Forward 
                 x_fuse, list_maps = self.model(data)

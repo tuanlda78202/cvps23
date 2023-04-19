@@ -10,8 +10,7 @@ data_loader:
   type: KNC_DataLoader
 
   args:
-    # bs20 ~ 14GB RAM
-    batch_size: 2
+    batch_size: 12
     shuffle: true
     num_workers: 1
     validation_split: 0.1
