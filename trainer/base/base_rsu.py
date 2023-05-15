@@ -6,7 +6,6 @@ from torch.nn import MaxPool2d, Upsample
 import torch.nn.functional as F
 
 
-# Up-sample tensor 'source' to have the same spatial size with tensor 'target'
 def _up_same(x, size):
     return nn.Upsample(size=size, mode="bilinear", align_corners=False)(x)
 

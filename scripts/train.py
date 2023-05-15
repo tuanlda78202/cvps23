@@ -38,7 +38,8 @@ def main(config):
     logger.info(model)
 
     # Device GPU training
-    model = model.to(config["device"])
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
 
     # Loss & Metrics
     criterion = getattr(module_loss, config["loss"])
@@ -56,7 +57,7 @@ def main(config):
         metrics,
         optimizer,
         config=config,
-        device=config["device"],
+        device=device,
         data_loader=data_loader,
         valid_data_loader=valid_data_loader,
         lr_scheduler=lr_scheduler,

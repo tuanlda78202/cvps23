@@ -1,6 +1,6 @@
 name: U2NetLite_scratch_1gpu-bs4_KNC_size320x320
 
-device: "cpu"
+device: "cuda:0"
 n_gpu: 1
 
 arch:

@@ -1,3 +1,7 @@
+import sys, os
+
+sys.path.append(os.getcwd())
+
 from trainer.base.base_rsu import _up_same, _size_map, RSU, RBC
 from trainer.metrics.loss import *
 from trainer.model.u2net import U2Net
@@ -84,20 +88,11 @@ def isnet():
     return ISNetDIS(config=config, out_channel=1)
 
 
-def unet(x, height=1):
-    if height < 6:
-        x1 = getattr(self, f"stage{height}")(x)
+from torchsummary import summary
 
-        x2 = unet(getattr(self, "down_sample")(x1), height + 1)
-
-        x = getattr(self, f"stage{height}d")(torch.cat((x2, x1), 1))
-
-        side(x, height)
-
-        return _up_same(x, sizes[height - 1]) if height > 1 else x
-
-    else:
-        x = getattr(self, f"stage{height}")(x)
-        side(x, height)
-
-        return _up_same(x, sizes[height - 1])
+summary(
+    isnet_gte(),
+    input_size=(1, 1024, 1024),
+    batch_size=8,
+    device="cpu",
+)
