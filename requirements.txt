@@ -12,3 +12,5 @@ tqdm==4.64.1
 wandb==0.14.2
 pysodmetrics==1.4.0
 split-folders==0.5.1
+flake8==6.0.0
+black==23.3.0

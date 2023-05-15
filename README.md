@@ -28,7 +28,7 @@ cvps23/
 ├── configs/ - training config
 |   ├── README.md - config name style
 │   ├── */README.md - abstract and experiment results model
-|   ├── api-key/ - wandb api key for monitoring
+|   ├── api/ - wandb api key for monitoring
 |
 ├── tools/ - script to downloading data, training, testing, inference and web interface
 |
