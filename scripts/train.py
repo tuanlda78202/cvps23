@@ -11,7 +11,7 @@ import trainer.metrics.loss as module_loss
 import trainer.metrics.metric as module_metric
 import trainer.model as module_arch
 from configs.parse_config import ConfigParser
-from trainer import U2NetTrainer
+from trainer import U2NetTrainer, DISTrainer
 
 import warnings
 
@@ -51,7 +51,7 @@ def main(config):
     lr_scheduler = config.init_obj("lr_scheduler", torch.optim.lr_scheduler, optimizer)
 
     # Loop
-    trainer = U2NetTrainer(
+    trainer = DISTrainer(
         model,
         criterion,
         metrics,

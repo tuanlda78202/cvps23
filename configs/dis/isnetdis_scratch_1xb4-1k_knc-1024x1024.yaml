@@ -3,11 +3,11 @@ name: ISNetDIS_scratch_1gpu-bs4_KNC_size1024x1024
 n_gpu: 1
 
 arch:
-  type: u2net_full
+  type: ISNetDIS
   args: {}
 
 data_loader:
-  type: KNC_DataLoader
+  type: KNCDataLoader
   args:
 
     batch_size_train: 4
