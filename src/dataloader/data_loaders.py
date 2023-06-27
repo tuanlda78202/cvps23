@@ -1,7 +1,7 @@
 from torchvision import transforms
-from trainer.base.base_data_loader import BaseDataLoader
-from trainer.dataloader.datasets import *
-from trainer.dataloader.datasets import ImageProcess
+from src.base.base_data_loader import BaseDataLoader
+from src.dataloader.datasets import *
+from src.dataloader.datasets import ImageProcess
 import sys
 import os
 

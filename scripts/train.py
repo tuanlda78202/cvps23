@@ -6,12 +6,12 @@ import argparse
 import collections
 import torch
 import numpy as np
-import trainer.dataloader.data_loaders as module_data
-import trainer.metrics.loss as module_loss
-import trainer.metrics.metric as module_metric
-import trainer.model as module_arch
+import src.dataloader.data_loaders as module_data
+import src.metrics.loss as module_loss
+import src.metrics.metric as module_metric
+import src.model as module_arch
 from configs.parse_config import ConfigParser
-from trainer import U2NetTrainer, DISTrainer
+from src.trainer import U2NetTrainer, DISTrainer
 
 import warnings
 

@@ -9,8 +9,8 @@ logger.setLevel(logging.WARNING)
 import numpy as np
 import torch
 from torchvision.utils import make_grid
-from trainer.base import BaseTrainer
-from trainer.metrics.metric import mae, sm
+from src.base import BaseTrainer
+from src.metrics.metric import mae, sm
 from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb

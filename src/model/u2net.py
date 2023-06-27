@@ -7,7 +7,7 @@ import sys, os
 
 sys.path.append(os.getcwd())
 
-from trainer.base.base_rsu import _up_same, _size_map, RSU
+from src.base.base_rsu import _up_same, _size_map, RSU
 
 
 # U2Net
