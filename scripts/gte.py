@@ -19,7 +19,6 @@ def get_gt_encoder(
     train_dataloaders,
     train_datasets,
     valid_dataloaders,
-    valid_datasets,
     settings,
     train_dataloaders_val,
     train_datasets_val,
