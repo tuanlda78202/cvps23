@@ -4,6 +4,9 @@ import time
 import numpy as np
 from skimage import io
 import time
+import argparse
+import collections
+from configs.parse_config import ConfigParser
 
 import torch, gc
 from torch.autograd import Variable
@@ -11,17 +14,19 @@ import torch.optim as optim
 import torch.nn.functional as F
 
 from src.model import ISNetGTEncoder
+from src.metrics.metric import f1_mae_torch
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def get_gt_encoder(
-    train_dataloaders,
+def train_gte(
     train_datasets,
+    train_datasets_val,
+    train_dataloaders,
+    train_dataloaders_val,
+    valid_datasets,
     valid_dataloaders,
     settings,
-    train_dataloaders_val,
-    train_datasets_val,
 ):
     config = settings["gte"]
 
@@ -30,7 +35,7 @@ def get_gt_encoder(
         torch.cuda.manual_seed(config["seed"])
 
     print("Define GT Encoder ...")
-    net = ISNetGTEncoder()  # UNETGTENCODERCombine()
+    net = ISNetGTEncoder()
 
     # Resume the GT Encoder
     if config["gt_encoder_model"] != "":
@@ -137,7 +142,7 @@ def get_gt_encoder(
                 notgood_cnt += 1
                 # net.eval()
                 # tmp_f1, tmp_mae, val_loss, tar_loss, i_val, tmp_time = valid_gt_encoder(net, valid_dataloaders, valid_datasets, hypar, epoch)
-                tmp_f1, tmp_mae, val_loss, tar_loss, i_val, tmp_time = valid_gt_encoder(
+                tmp_f1, tmp_mae, val_loss, tar_loss, i_val, tmp_time = valid_gte(
                     net, train_dataloaders_val, train_datasets_val, hypar, epoch
                 )
 
@@ -201,7 +206,7 @@ def get_gt_encoder(
     return net
 
 
-def valid_gt_encoder(net, valid_dataloaders, valid_datasets, settings, epoch=0):
+def valid_gte(net, valid_dataloaders, valid_datasets, settings, epoch=0):
     hypar = settings["gte"]
 
     net.eval()
@@ -327,3 +332,24 @@ def valid_gt_encoder(net, valid_dataloaders, valid_datasets, settings, epoch=0):
         print("MAE: ", np.mean(MAE))
 
     return tmp_f1, tmp_mae, val_loss, tar_loss, i_val, tmp_time
+
+
+if __name__ == "__main__":
+    args = argparse.ArgumentParser(description="Salient Object Detection")
+
+    args.add_argument(
+        "-c",
+        "--config",
+        default="configs/u2net/u2net-lite_scratch_1xb16-1k_knc-320x320.yaml",
+        type=str,
+        help="config file path (default: None)",
+    )
+
+    config = ConfigParser.from_args(args)
+
+    model = ISNetGTEncoder()
+
+    # Dataset + Dataloader Train + Valid + Test
+
+    # Settings YAML load config
+    train_gte(config)

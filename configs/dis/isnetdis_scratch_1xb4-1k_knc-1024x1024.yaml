@@ -7,6 +7,8 @@ arch:
   args: {}
 
 gte:
+  interm_supervision: True
+
   seed: 0
   gt_encoder_model: ""
 
