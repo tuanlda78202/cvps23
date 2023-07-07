@@ -27,7 +27,7 @@ class KNCDataLoader(BaseDataLoader):
                 [
                     Rescale(self.output_size),
                     RandomCrop(self.crop_size),
-                    Normalize,
+                    NormTensor(),
                 ]
             ),
         )

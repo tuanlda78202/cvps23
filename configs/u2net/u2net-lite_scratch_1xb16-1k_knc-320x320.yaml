@@ -1,7 +1,7 @@
 name: U2NetLite_scratch_1gpu-bs4_KNC_size320x320
 
-device: "cuda:0"
-n_gpu: 1
+device: "cpu"
+n_gpu: 0
 
 arch:
   type: u2net_lite
@@ -13,7 +13,7 @@ data_loader:
   args:
     batch_size: 16
     shuffle: true
-    num_workers: 6
+    num_workers: 4
     validation_split: 0.1
     output_size: 320
     crop_size: 288

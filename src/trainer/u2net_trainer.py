@@ -1,7 +1,8 @@
 import logging
+import os
 
-# os.environ["WANDB_SILENT"] = "True"
-# os.environ['WANDB_MODE'] = 'offline'
+os.environ["WANDB_SILENT"] = "True"
+os.environ["WANDB_MODE"] = "disabled"
 logger = logging.getLogger("wandb")
 logger.setLevel(logging.ERROR)
 logger.setLevel(logging.WARNING)

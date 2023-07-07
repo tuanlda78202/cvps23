@@ -9,6 +9,9 @@ import torch
 from torch.utils.data import Dataset
 from torchvision.transforms.functional import normalize
 from collections import defaultdict
+import cv2
+import albumentations
+import albumentations.pytorch
 
 
 class KNCDataset(Dataset):
@@ -18,22 +21,27 @@ class KNCDataset(Dataset):
     def __init__(self, img_list, mask_list, transform):
         self.img_list = img_list
         self.mask_list = mask_list
-        self.len = len(self.img_list)
         self.transform = transform
 
     def __len__(self):
-        return self.len
+        return len(self.img_list)
 
     def __getitem__(self, idx):
-        # H x W x 3
-        img = io.imread(self.img_list[idx])
+        """
+        The __getitem__ function loads and returns a sample from the dataset at the given index idx.
+        Based on the index, it identifies the image’s location on disk, converts that to a tensor using read_image,
+        retrieves the corresponding label from the csv data in self.img_labels, calls the transform functions on them (if applicable),
+        and returns the tensor image and corresponding label in a tuple.
+        """
         img_idx = np.array([idx])
+
+        img = cv2.imread(self.img_list[idx])
 
         # Iter mask list
         if len(self.mask_list) == 0:
             mask_rbg = np.zeros(img.shape)
         else:
-            mask_rbg = io.imread(self.mask_list[idx])
+            mask_rbg = cv2.imread(self.mask_list[idx])
 
         mask = np.zeros(mask_rbg.shape[0:2])
 
@@ -43,7 +51,7 @@ class KNCDataset(Dataset):
         elif len(mask_rbg.shape) == 2:
             mask = mask_rbg
 
-        # Assure img and mask has 3 channels
+        # Assure img & mask has 3 channels
         if len(img.shape) == 3 and len(mask.shape) == 2:
             mask = mask[:, :, np.newaxis]
 
@@ -58,127 +66,6 @@ class KNCDataset(Dataset):
             sample = self.transform(sample)
 
         return sample
-
-
-class Rescale(object):
-    """Rescale size with output quality defined"""
-
-    def __init__(self, output_size):
-        assert isinstance(output_size, (int, tuple))
-        self.output_size = output_size
-
-    def __call__(self, sample):
-        # Image index, Image and Mask
-        img_idx, img, mask = sample["img_idx"], sample["img"], sample["mask"]
-
-        img = torch.squeeze(
-            F.interpolate(
-                torch.unsqueeze(img, dim=0), self.output_size, mode="bilinear"
-            ),
-            dim=0,
-        )
-
-        mask = torch.squeeze(
-            F.interpolate(
-                torch.unsqueeze(mask, dim=0), self.output_size, mode="bilinear"
-            ),
-            dim=0,
-        )
-
-        return {"img_idx": img_idx, "img": img, "mask": mask}
-
-
-class RandomCrop(object):
-    """Data Augmentation random 0.5"""
-
-    def __init__(self, output_size, prob=0.5):
-        self.prob = prob
-        assert isinstance(output_size, (int, tuple))
-
-        if isinstance(output_size, int):
-            self.output_size = (output_size, output_size)
-        else:
-            assert len(output_size) == 2
-            self.output_size = output_size
-
-    def __call__(self, sample):
-        # Image index, Image and Mask
-        img_idx, img, mask = sample["img_idx"], sample["img"], sample["mask"]
-
-        # Reverse image (array) [::-1]
-        if random.random() >= self.prob:
-            img, mask = img[::-1], mask[::-1]
-
-        # numpy: H x W x 3
-        if img.shape[0] > img.shape[2]:
-            h, w = img.shape[:2]
-
-        # torch: 3 x H x W
-        elif img.shape[0] < img.shape[2]:
-            h, w = img.shape[1:]
-
-        new_h, new_w = self.output_size
-
-        # Random range
-        top = np.random.randint(0, h - new_h)
-        left = np.random.randint(0, w - new_w)
-
-        # Crop
-        img = img[top : top + new_h, left : left + new_w]
-        mask = mask[top : top + new_h, left : left + new_w]
-
-        return {"img_idx": img_idx, "img": img, "mask": mask}
-
-
-class RandomHFlip(object):
-    """Random Horizontal Flip image"""
-
-    def __init__(self, prob=0.5):
-        self.prob = prob
-
-    def __call__(self, sample):
-        img_idx, img, mask = sample["img_idx"], sample["img"], sample["mask"]
-
-        # 3 x H x W
-        if random.random() >= self.prob:
-            img = torch.flip(img, dims=[2])
-            mask = torch.flip(mask, dims=[2])
-
-        return {"img_idx": img_idx, "img": img, "mask": mask}
-
-
-class RandomVFlip(object):
-    """Random Vertical Flip image"""
-
-    def __init__(self, prob=0.5):
-        self.prob = prob
-
-    def __call__(self, sample):
-        img_idx, img, mask = sample["img_idx"], sample["img"], sample["mask"]
-
-        # 3 x H x W
-        if random.random() >= self.prob:
-            img = torch.flip(img, dims=[1])
-            mask = torch.flip(mask, dims=[1])
-
-        return {"img_idx": img_idx, "img": img, "mask": mask}
-
-
-class Normalize(object):
-    """Image Normalization
-    output[channel] = (input[channel] - mean[channel]) / std[channel]
-    """
-
-    def __init__(self, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
-        self.mean = mean
-        self.std = std
-
-    def __call__(self, sample):
-        img_idx, img, mask = sample["img_idx"], sample["img"], sample["mask"]
-
-        img = normalize(img, self.mean, self.std)
-
-        return {"img_idx": img_idx, "img": img, "mask": mask}
 
 
 class ImageProcess:
@@ -273,3 +160,131 @@ class ImageProcess:
             gt_tensor = torch.squeeze(gt_tensor, dim=0)
 
         return gt_tensor.type(torch.uint8), gt.shape[:2]
+
+
+class Rescale(object):
+    """
+    Rescale size with output quality defined
+    """
+
+    def __init__(self, output_size):
+        assert isinstance(output_size, (int, tuple))
+        self.output_size = output_size
+        self.resize = albumentations.Resize(output_size, output_size)
+
+    def __call__(self, sample):
+        # Image index, Image and Mask
+        img_idx, img, mask = sample["img_idx"], sample["img"], sample["mask"]
+        h, w = img.shape[:2]
+
+        if isinstance(self.output_size, int):
+            if h > w:
+                new_h, new_w = self.output_size * (h / w), self.output_size
+            else:
+                new_h, new_w = self.output_size, self.output_size * (w / h)
+        else:
+            new_h, new_w = self.output_size
+
+        new_h, new_w = int(new_h), int(new_w)
+
+        # Resize the image to new_h x new_w and convert image from range [0,255] to [0,1]
+        # img = transform.resize(image,(new_h,new_w),mode='constant')
+        # lbl = transform.resize(label,(new_h,new_w),mode='constant', order=0, preserve_range=True)
+
+        return {
+            "img_idx": img_idx,
+            "img": self.resize(image=img)["image"],
+            "mask": self.resize(image=mask)["image"],
+        }
+
+
+class RandomCrop(object):
+    """
+    Data Augmentation random 0.5
+    """
+
+    def __init__(self, output_size):
+        assert isinstance(output_size, (int, tuple))
+
+        if isinstance(output_size, int):
+            self.output_size = (output_size, output_size)
+        else:
+            assert len(output_size) == 2
+            self.output_size = output_size
+        self.crop = albumentations.Compose(
+            [albumentations.RandomCrop(*self.output_size)],
+            additional_targets={"mask": "image"},
+        )
+
+    def __call__(self, sample):
+        # Image index, Image and Mask
+
+        img_idx, img, mask = sample["img_idx"], sample["img"], sample["mask"]
+
+        h, w = img.shape[:2]
+        new_h, new_w = self.output_size
+
+        # Crop
+        img_and_mask = self.crop(image=img, mask=mask)
+
+        return {
+            "img_idx": img_idx,
+            "img": img_and_mask["image"],
+            "mask": img_and_mask["mask"],
+        }
+
+
+class Flip(object):
+    """Convert ndarrays in sample to Tensors."""
+
+    def __init__(self, p_H=0.5, p_V=0.5):
+        self.flip = albumentations.Compose(
+            [albumentations.HorizontalFlip(p=p_H), albumentations.VerticalFlip(p=p_V)],
+            additional_targets={"mask": "image"},
+        )
+
+    def __call__(self, sample):
+        img_idx, img, mask = sample["img_idx"], sample["img"], sample["mask"]
+
+        transformed = self.flip(image=img, mask=mask)
+
+        return {
+            "img_idx": img_idx,
+            "img": transformed["image"],
+            "mask": transformed["mask"],
+        }
+
+
+class NormTensor(object):
+    """Convert ndarrays in sample to Tensors."""
+
+    def __init__(self, flag=0):
+        self.flag = flag
+        self.mask_to_tensor = albumentations.Compose(
+            [
+                albumentations.Normalize(mean=[0], std=[1]),
+                albumentations.pytorch.transforms.ToTensorV2(),
+            ]
+        )
+        self.image_to_tensor = albumentations.Compose(
+            [
+                albumentations.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+                albumentations.pytorch.transforms.ToTensorV2(),
+            ]
+        )
+
+    def __call__(self, sample):
+        img_idx, img, mask = sample["img_idx"], sample["img"], sample["mask"]
+
+        mask = self.mask_to_tensor(image=mask)
+
+        # RGB color
+        img = self.image_to_tensor(image=img)
+
+        return {
+            "img_idx": torch.from_numpy(img_idx),
+            "img": img["image"],
+            "mask": mask["image"],
+        }
