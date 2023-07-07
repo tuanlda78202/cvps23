@@ -6,6 +6,22 @@ arch:
   type: ISNetDIS
   args: {}
 
+gte:
+  seed: 0
+  gt_encoder_model: ""
+
+  model_path: "../saved_models/IS-Net-test"
+  model_save_fre: 2000
+  max_ite: 10000000
+
+  batch_size_train: 8
+  batch_size_valid: 1
+
+  start_ite: 0 
+  max_epoch_num: 1000000
+
+  early_stop: 20
+
 data_loader:
   type: KNCDataLoader
   args:
