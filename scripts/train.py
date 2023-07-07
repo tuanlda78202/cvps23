@@ -38,7 +38,7 @@ def main(config):
     logger.info(model)
 
     # Device GPU training
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda")
     model = model.to(device)
 
     # Loss & Metrics
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-d",
         "--device",
-        default="mps",
+        default="cuda",
         type=str,
         help="indices of GPUs to enable (default: all)",
     )
@@ -102,7 +102,5 @@ if __name__ == "__main__":
         ),
         CustomArgs(["--ep", "--epochs"], type=int, target="trainer;epochs"),
     ]
-
     config = ConfigParser.from_args(args, options)
-
     main(config)

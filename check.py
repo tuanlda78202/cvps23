@@ -12,9 +12,11 @@ data = KNCDataset(
         [
             Rescale(320),
             RandomCrop(288),
-            Normalize(),
+            NormTensor(),
         ]
     ),
 )
 
-print(data[0]["img"].shape)
+print(data[1]["img"].shape)
+
+print(torch.cuda.is_available())
