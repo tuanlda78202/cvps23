@@ -11,7 +11,7 @@ import src.metrics.loss as module_loss
 import src.metrics.metric as module_metric
 import src.model as module_arch
 from configs.parse_config import ConfigParser
-from src.trainer import U2NetTrainer, DISTrainer
+from src.trainer import U2NetTrainer
 
 import warnings
 

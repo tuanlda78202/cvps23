@@ -1,14 +1,20 @@
 # GT Encoder
-import os
+import sys, os
+
+sys.path.append(os.getcwd())
+
 import time
 import numpy as np
 from skimage import io
 import time
 import argparse
-import collections
 from configs.parse_config import ConfigParser
 
-import torch, gc
+import src.dataloader.data_loaders as module_data
+import src.model as module_arch
+
+import torch
+import gc
 from torch.autograd import Variable
 import torch.optim as optim
 import torch.nn.functional as F
@@ -20,11 +26,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def train_gte(
-    train_datasets,
-    train_datasets_val,
     train_dataloaders,
-    train_dataloaders_val,
-    valid_datasets,
     valid_dataloaders,
     settings,
 ):
@@ -70,8 +72,6 @@ def train_gte(
     running_loss = 0.0  # count the toal loss
     running_tar_loss = 0.0  # count the target output loss
     last_f1 = [0 for x in range(len(valid_dataloaders))]
-
-    train_num = train_datasets[0].__len__()
 
     net.train()
 
@@ -123,12 +123,10 @@ def train_gte(
             print(
                 "GT Encoder Training>>>"
                 + model_path.split("/")[-1]
-                + " - [epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f, time-per-iter: %3f s, time_read: %3f"
+                + " - [epoch: %3d/%3d, ite: %d] train loss: %3f, tar: %3f, time-per-iter: %3f s, time_read: %3f"
                 % (
                     epoch + 1,
                     epoch_num,
-                    (i + 1) * batch_size_train,
-                    train_num,
                     ite_num,
                     running_loss / ite_num4val,
                     running_tar_loss / ite_num4val,
@@ -143,7 +141,7 @@ def train_gte(
                 # net.eval()
                 # tmp_f1, tmp_mae, val_loss, tar_loss, i_val, tmp_time = valid_gt_encoder(net, valid_dataloaders, valid_datasets, hypar, epoch)
                 tmp_f1, tmp_mae, val_loss, tar_loss, i_val, tmp_time = valid_gte(
-                    net, train_dataloaders_val, train_datasets_val, hypar, epoch
+                    net, valid_dataloaders, settings, epoch
                 )
 
                 net.train()  # resume train
@@ -206,7 +204,7 @@ def train_gte(
     return net
 
 
-def valid_gte(net, valid_dataloaders, valid_datasets, settings, epoch=0):
+def valid_gte(net, valid_dataloaders, settings, epoch=0):
     hypar = settings["gte"]
 
     net.eval()
@@ -338,18 +336,41 @@ if __name__ == "__main__":
     args = argparse.ArgumentParser(description="Salient Object Detection")
 
     args.add_argument(
+        "-d",
+        "--device",
+        default="cuda",
+        type=str,
+        help="indices of GPUs to enable (default: all)",
+    )
+
+    args.add_argument(
         "-c",
         "--config",
-        default="configs/u2net/u2net-lite_scratch_1xb16-1k_knc-320x320.yaml",
+        default="configs/dis/isnetdis_scratch_1xb4-1k_knc-1024x1024.yaml",
         type=str,
         help="config file path (default: None)",
     )
 
+    args.add_argument(
+        "-r",
+        "--resume",
+        default=None,
+        type=str,
+        help="path to latest checkpoint (default: None)",
+    )
+
     config = ConfigParser.from_args(args)
 
-    model = ISNetGTEncoder()
+    # Data
+    data_loader = config.init_obj("data_loader", module_data)
+    valid_data_loader = data_loader.split_validation()
 
-    # Dataset + Dataloader Train + Valid + Test
+    # Model
+    model = config.init_obj("arch", module_arch)
 
     # Settings YAML load config
-    train_gte(config)
+    train_gte(
+        train_dataloaders=data_loader,
+        valid_dataloaders=valid_data_loader,
+        settings=config,
+    )
