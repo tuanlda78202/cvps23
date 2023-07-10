@@ -24,24 +24,68 @@ def _size_map(x, height):
     return sizes
 
 
-# RELu + BatchNorm + Conv
-class RBC(nn.Module):
-    def __init__(self, in_ch=3, out_ch=3, dilate=1, stride=None, padding=None):
-        super().__init__()
-        self.conv = nn.Conv2d(
-            in_ch,
-            out_ch,
-            kernel_size=3,
-            stride=1,
-            padding=1 * dilate,
-            dilation=1 * dilate,
+# RELu + BatchNorm + DPConv
+class RBDP(nn.Module):
+    def __init__(self, in_ch=3, out_ch=3, dirate=1, stride=1):
+        super(RBDP, self).__init__()
+        # kernel 1X1
+        self.conv1x1 = nn.Conv2d(in_ch, out_ch, 1)
+        # global average pooling
+        self.GAP = nn.AdaptiveAvgPool2d((1, 1))
+        # MLP
+        self.flatten = nn.Flatten()
+        self.relu = nn.ReLU()
+        self.linear = nn.Linear(out_ch, 4)
+        self.softmax = nn.Softmax(dim=1)
+
+        # Paramidal convolution
+        self.conv3x3 = nn.Conv2d(
+            out_ch, out_ch, 3, padding=1 * dirate, dilation=1 * dirate, stride=stride
         )
-        self.bn = nn.BatchNorm2d(out_ch)
-        self.relu = nn.ReLU(inplace=True)
+        self.conv5x5 = nn.Conv2d(
+            out_ch, out_ch, 5, padding=2 * dirate, dilation=1 * dirate, stride=stride
+        )
+        self.conv7x7 = nn.Conv2d(
+            out_ch, out_ch, 7, padding=3 * dirate, dilation=1 * dirate, stride=stride
+        )
+        self.conv9x9 = nn.Conv2d(
+            out_ch, out_ch, 9, padding=4 * dirate, dilation=1 * dirate, stride=stride
+        )
+
+        # kernel 1X1 final
+        self.conv1x1_final = nn.Conv2d(4 * out_ch, out_ch, 1)
+
+        # ReLU + BatchNorm
+        self.bn_s1 = nn.BatchNorm2d(out_ch)
+        self.relu_s1 = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        x = self.relu(self.bn(self.conv(x)))
-        return x
+        x = self.conv1x1(x)
+        hx = x
+        # GAP + MLP
+        hx = self.GAP(hx)
+        hx = self.flatten(hx)
+        hx = self.relu(hx)
+        hx = self.linear(hx)
+        hx = self.softmax(hx)
+        # Paramidal convolution
+        out1 = self.conv3x3(x)
+        out2 = self.conv5x5(x)
+        out3 = self.conv7x7(x)
+        out4 = self.conv9x9(x)
+
+        # channel wise
+        for i in range(hx.shape[0]):
+            out1[i] = out1[i] * hx[i][0]
+            out2[i] = out2[i] * hx[i][1]
+            out3[i] = out3[i] * hx[i][2]
+            out4[i] = out4[i] * hx[i][3]
+        # concatenation
+        out_fuse = torch.cat((out1, out2, out3, out4), 1)
+        # conv1x1_final
+        y = self.conv1x1_final(out_fuse)
+
+        return self.relu_s1(self.bn_s1(y + x))
 
 
 # Residual U-blocks
@@ -57,27 +101,27 @@ class RSU(nn.Module):
 
     def _make_layers(self, height, in_channel, mid_channel, out_channel, dilated=False):
         # RELu + BatchNorm + Convolution Input & MaxPool 2D
-        self.add_module("rbc_in", RBC(in_channel, out_channel))
+        self.add_module("rbc_in", RBDP(in_channel, out_channel))
         self.add_module(
             "down_sample", nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True)
         )
 
         # Encoder & Decoder RSU
-        self.add_module(f"rbc1", RBC(out_channel, mid_channel))
-        self.add_module(f"rbc1d", RBC(mid_channel * 2, out_channel))
+        self.add_module(f"rbc1", RBDP(out_channel, mid_channel))
+        self.add_module(f"rbc1d", RBDP(mid_channel * 2, out_channel))
 
         # Length of RSU blocks = 7
         for i in range(2, height):
             # Dilated Kernel
             dilate = 1 if not dilated else 2 ** (i - 1)
 
-            self.add_module(f"rbc{i}", RBC(mid_channel, mid_channel, dilate=dilate))
+            self.add_module(f"rbc{i}", RBDP(mid_channel, mid_channel, dirate=dilate))
             self.add_module(
-                f"rbc{i}d", RBC(mid_channel * 2, mid_channel, dilate=dilate)
+                f"rbc{i}d", RBDP(mid_channel * 2, mid_channel, dirate=dilate)
             )
 
         dilate = 2 if not dilated else 2 ** (height - 1)
-        self.add_module(f"rbc{height}", RBC(mid_channel, mid_channel, dilate=dilate))
+        self.add_module(f"rbc{height}", RBDP(mid_channel, mid_channel, dirate=dilate))
 
     def forward(self, x):
         # Input
