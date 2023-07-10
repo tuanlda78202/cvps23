@@ -57,7 +57,7 @@ class RBDP(nn.Module):
 
         # ReLU + BatchNorm
         self.bn_s1 = nn.BatchNorm2d(out_ch)
-        self.relu_s1 = nn.ReLU(inplace=True)
+        self.relu_s1 = nn.ReLU()
 
     def forward(self, x):
         x = self.conv1x1(x)
