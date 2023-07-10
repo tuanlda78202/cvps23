@@ -1,5 +1,4 @@
 from __future__ import print_function, division
-import random
 from skimage import io
 import torch.nn.functional as F
 import numpy as np
@@ -7,8 +6,6 @@ import os
 import glob
 import torch
 from torch.utils.data import Dataset
-from torchvision.transforms.functional import normalize
-from collections import defaultdict
 import cv2
 import albumentations
 import albumentations.pytorch
