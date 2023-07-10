@@ -10,7 +10,7 @@ def maxfm(pred, gt):
     FM = py_sod_metrics.Fmeasure()
     FM.step(pred, gt)
     fm = FM.get_results()["fm"]
-    return fm["curve"]
+    return fm["curve"].mean()
 
 
 # Mean Absolute Error ↓ - 12CVPR

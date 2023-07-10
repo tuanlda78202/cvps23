@@ -11,7 +11,7 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from src.base import BaseTrainer
-from src.metrics.metric import mae, sm
+from src.metrics.metric import *
 from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb
@@ -103,14 +103,19 @@ class U2NetTrainer(BaseTrainer):
                 mask.cpu().detach().numpy(),
             )
 
+            if self.lr_scheduler is not None:
+                self.lr_scheduler.step()
+
             # Metrics
             # log_maxfm, log_wfm = maxfm(map_np, mask_np), wfm(map_np, mask_np)
 
             log_mae = mae(map_np, mask_np)
             log_sm = sm(map_np, mask_np)
 
+            lrt = self.lr_scheduler.get_last_lr()[0]
+
             # Progress bar
-            tqdm_batch.set_postfix(loss=log_loss, mae=log_mae, sm=log_sm)
+            tqdm_batch.set_postfix(loss=log_loss, mae=log_mae, sm=log_sm, lr=lrt)
 
             # WandB
             wandb.log({"loss": log_loss, "mae": log_mae, "sm": log_sm})
@@ -142,8 +147,8 @@ class U2NetTrainer(BaseTrainer):
             val_log = self._valid_epoch(epoch)
             log.update(**{"val_" + k: v for k, v in val_log.items()})
 
-        if self.lr_scheduler is not None:
-            self.lr_scheduler.step()
+        # if self.lr_scheduler is not None:
+        #     self.lr_scheduler.step()
 
         return log
 

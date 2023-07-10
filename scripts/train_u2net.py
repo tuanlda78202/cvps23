@@ -72,7 +72,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default="configs/u2net/u2net-lite_scratch_1xb16-1k_knc-320x320.yaml",
+        default="configs/u2net/u2net-full_scratch_1xb4-1k_knc-320x320.yaml",
         type=str,
         help="config file path (default: None)",
     )

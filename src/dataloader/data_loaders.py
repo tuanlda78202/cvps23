@@ -12,12 +12,19 @@ class KNCDataLoader(BaseDataLoader):
     """Korean Name Card Data Loader (data ~ 82k, data-demo ~ 1.6k)"""
 
     def __init__(
-        self, output_size, crop_size, batch_size, shuffle, validation_split, num_workers
+        self,
+        output_size,
+        crop_size,
+        batch_size,
+        shuffle,
+        validation_split,
+        num_workers,
+        dir,
     ):
         self.output_size = output_size
         self.crop_size = crop_size
 
-        image_process = ImageProcess(dir="../sod_data")
+        image_process = ImageProcess(dir)
         self.img_list, self.mask_list = image_process.mask_image_list()
 
         self.dataset = KNCDataset(

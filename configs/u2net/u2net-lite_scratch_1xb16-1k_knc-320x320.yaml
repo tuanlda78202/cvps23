@@ -47,7 +47,7 @@ trainer:
 
   epochs: 1000
   save_dir: saved/
-  save_period: 10
+  save_period: 1
   verbosity: 1
 
   visual_tool: wandb

@@ -12,15 +12,15 @@ gte:
   seed: 0
   gt_encoder_model: ""
 
-  model_path: "../saved_models/"
+  model_path: "../saved_gte/"
   model_save_fre: 2000
   max_ite: 10000000
 
-  batch_size_train: 8
+  batch_size_train: 1
   batch_size_valid: 1
 
   start_ite: 0 
-  max_epoch_num: 1000000
+  max_epoch_num: 10
 
   early_stop: 20
 
@@ -28,12 +28,14 @@ data_loader:
   type: KNCDataLoader
   args:
 
-    batch_size: 1
+    batch_size: 12
     shuffle: true
-    num_workers: 1
+    num_workers: 4
     validation_split: 0.1
-    output_size: 1024
-    crop_size: 1024
+    output_size: 400
+    crop_size: 384
+
+    dir: "../split_dataset/train"
 
 optimizer:
   type: Adam
@@ -60,9 +62,9 @@ lr_scheduler:
 trainer:
   type: Trainer
 
-  epochs: 1000
+  epochs: 10
   save_dir: saved/
-  save_period: 5
+  save_period: 1
   verbosity: 1
 
   visual_tool: wandb

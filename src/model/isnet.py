@@ -502,6 +502,9 @@ class ISNetGTEncoder(nn.Module):
         self.side5 = nn.Conv2d(512, out_ch, 3, padding=1)
         self.side6 = nn.Conv2d(512, out_ch, 3, padding=1)
 
+    def compute_loss(self, preds, targets):
+        return muti_loss_fusion(preds, targets)
+
     def forward(self, x):
         hx = x
 
