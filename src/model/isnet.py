@@ -680,5 +680,5 @@ class ISNetDIS(nn.Module):
 
 from torchsummary import summary
 
-model = ISNetDIS().cuda()
-print(summary(model, (3, 1024, 1024), batch_size=1))
+# model = ISNetDIS().cuda()
+# print(summary(model, (3, 1024, 1024), batch_size=1))

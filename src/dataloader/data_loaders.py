@@ -17,7 +17,7 @@ class KNCDataLoader(BaseDataLoader):
         self.output_size = output_size
         self.crop_size = crop_size
 
-        image_process = ImageProcess(dir="data_demo")  # ../sod_data
+        image_process = ImageProcess(dir="../sod_data")
         self.img_list, self.mask_list = image_process.mask_image_list()
 
         self.dataset = KNCDataset(
