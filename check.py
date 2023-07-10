@@ -5,6 +5,7 @@ from torchvision import transforms
 
 image_process = ImageProcess(dir="data_demo")
 img_list, mask_list = image_process.mask_image_list()
+
 data = KNCDataset(
     img_list,
     mask_list,
@@ -17,6 +18,5 @@ data = KNCDataset(
     ),
 )
 
-print(data[1]["img"].shape)
 
-print(torch.cuda.is_available())
+print(len(data))
