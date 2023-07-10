@@ -90,7 +90,7 @@ def train_gte(
             ite_num4val = ite_num4val + 1
 
             # get the inputs
-            labels = data["label"]
+            labels = data["mask"]
 
             labels = labels.type(torch.FloatTensor)
 

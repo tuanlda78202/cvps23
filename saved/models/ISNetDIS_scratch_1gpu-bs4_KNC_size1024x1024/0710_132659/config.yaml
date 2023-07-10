@@ -1,0 +1,92 @@
+name: ISNetDIS_scratch_1gpu-bs4_KNC_size1024x1024
+n_gpu: 1
+arch:
+    type: ISNetDIS
+    args: {}
+gte:
+    interm_supervision: true
+    seed: 0
+    gt_encoder_model: ''
+    model_path: ../saved_models/
+    model_save_fre: 2000
+    max_ite: 10000000
+    batch_size_train: 8
+    batch_size_valid: 1
+    start_ite: 0
+    max_epoch_num: 1000000
+    early_stop: 20
+data_loader:
+    type: KNCDataLoader
+    args:
+        batch_size: 4
+        shuffle: true
+        num_workers: 1
+        validation_split: 0.1
+        output_size: 1024
+        crop_size: 1024
+optimizer:
+    type: Adam
+    args:
+        lr: 0.001
+        weight_decay: 0
+        eps: 1.0e-08
+        betas:
+        - 0.9
+        - 0.999
+loss: multi_mse_fusion
+metrics:
+- mae
+- sm
+lr_scheduler:
+    type: StepLR
+    args:
+        step_size: 50
+        gamma: 0.1
+trainer:
+    type: Trainer
+    epochs: 1000
+    save_dir: saved/
+    save_period: 5
+    verbosity: 1
+    visual_tool: wandb
+    project: cvps23
+    api_key_file: ./configs/api/tuanlda78202
+    entity: tuanlda78202
+test:
+    save_dir: saved/generated
+    n_sample: 1000
+    batch_size: 32
+dir:
+    start_ite: 0
+    model_path: ../saved_models/IS-Net-test
+    gt_encoder_model: null
+accurary:
+    model_digit: full
+    seed: 0
+cache:
+    cache_size:
+    - 1024
+    - 1024
+    cache_boost_train: false
+    cache_boost_valid: false
+augmentation:
+    input_size:
+    - 1024
+    - 1024
+    crop_size:
+    - 920
+    - 920
+    flip_hor: 1
+    random_flip_ver: 0
+saving:
+    model_save_freq: 2000
+    early_stop: 20
+    max_iter: 10000000
+    max_epoch_num: 1000000
+inference:
+    dataset_path: ../data_infer/knc
+    model_path: ../saved_models/IS-Net/isnet-general-use.pth
+    result_path: ../data_infer/knc_result
+    input_size:
+    - 1024
+    - 1024
