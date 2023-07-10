@@ -76,12 +76,11 @@ def train_gte(
     net.train()
 
     start_last = time.time()
-    gos_dataloader = train_dataloaders[0]
     epoch_num = config["max_epoch_num"]
     notgood_cnt = 0
 
     for epoch in range(epoch_num):  ## set the epoch num as 100000
-        for i, data in enumerate(gos_dataloader):
+        for i, data in enumerate(train_dataloaders):
             if ite_num >= max_ite:
                 print("Training Reached the Maximal Iteration Number ", max_ite)
                 exit()

@@ -12,7 +12,7 @@ gte:
   seed: 0
   gt_encoder_model: ""
 
-  model_path: "../saved_models/IS-Net-test"
+  model_path: "../saved_models/"
   model_save_fre: 2000
   max_ite: 10000000
 
@@ -28,9 +28,7 @@ data_loader:
   type: KNCDataLoader
   args:
 
-    batch_size_train: 4
-    batch_size_val: 1 
-
+    batch_size: 4
     shuffle: true
     num_workers: 1
     validation_split: 0.1
