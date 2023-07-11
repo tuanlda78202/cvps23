@@ -3,21 +3,39 @@ name: ISNetDIS_scratch_1gpu-bs4_KNC_size1024x1024
 n_gpu: 1
 
 arch:
-  type: u2net_full
+  type: ISNetDIS
   args: {}
 
+gte:
+  interm_supervision: True
+
+  seed: 0
+  gt_encoder_model: ""
+
+  model_path: "saved_gte/"
+  model_save_fre: 2000
+  max_ite: 10000000
+
+  batch_size_train: 1
+  batch_size_valid: 1
+
+  start_ite: 0 
+  max_epoch_num: 10
+
+  early_stop: 20
+
 data_loader:
-  type: KNC_DataLoader
+  type: KNCDataLoader
   args:
 
-    batch_size_train: 4
-    batch_size_val: 1 
-
+    batch_size: 12 # 32 for training gte
     shuffle: true
-    num_workers: 1
+    num_workers: 4
     validation_split: 0.1
-    output_size: 1024
-    crop_size: 1024
+    output_size: 400
+    crop_size: 384
+
+    dir: "data_demo" # "../split_dataset/train"
 
 optimizer:
   type: Adam
@@ -36,17 +54,17 @@ metrics:
   - sm
 
 lr_scheduler:
-  type: StepLR
+  type: CosineAnnealingLR
   args:
-    step_size: 50
-    gamma: 0.1
+    T_max: 14000
+    eta_min: 0.000001
 
 trainer:
   type: Trainer
 
-  epochs: 1000
+  epochs: 10
   save_dir: saved/
-  save_period: 5
+  save_period: 1
   verbosity: 1
 
   visual_tool: wandb

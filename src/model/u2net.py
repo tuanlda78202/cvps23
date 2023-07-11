@@ -7,7 +7,7 @@ import sys, os
 
 sys.path.append(os.getcwd())
 
-from trainer.base.base_rsu import _up_same, _size_map, RSU
+from src.base.base_rsu import _up_same, _size_map, RSU
 
 
 # U2Net
@@ -108,7 +108,7 @@ class U2Net(nn.Module):
 
         # X_fuse sigmoid + List feature maps
         x_fuse, list_maps = fuse(x_unet)
-        x_fuse = F.sigmoid(x_fuse)
+        x_fuse = torch.sigmoid(x_fuse)
 
         # x_map for metrics, list_maps for loss
         return x_fuse, list_maps
@@ -160,6 +160,6 @@ def u2net_lite():
     return U2Net(config=lite, out_channel=1)
 
 
-# Model parameters
-# from torchsummary import *
-# print(summary(u2net_lite(), (3, 320, 320), batch_size=8))
+x = u2net_full()
+y = x(torch.rand(1, 3, 320, 320))
+# print(y)

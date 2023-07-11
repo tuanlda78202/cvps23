@@ -6,12 +6,12 @@ import argparse
 import collections
 import torch
 import numpy as np
-import trainer.dataloader.data_loaders as module_data
-import trainer.metrics.loss as module_loss
-import trainer.metrics.metric as module_metric
-import trainer.model as module_arch
+import src.dataloader.data_loaders as module_data
+import src.metrics.loss as module_loss
+import src.metrics.metric as module_metric
+import src.model as module_arch
 from configs.parse_config import ConfigParser
-from trainer import U2NetTrainer
+from src.trainer import DISTrainer
 
 import warnings
 
@@ -38,7 +38,7 @@ def main(config):
     logger.info(model)
 
     # Device GPU training
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda")
     model = model.to(device)
 
     # Loss & Metrics
@@ -50,8 +50,8 @@ def main(config):
     optimizer = config.init_obj("optimizer", torch.optim, trainable_params)
     lr_scheduler = config.init_obj("lr_scheduler", torch.optim.lr_scheduler, optimizer)
 
-    # Loop
-    trainer = U2NetTrainer(
+    # U2NetTrainer
+    trainer = DISTrainer(
         model,
         criterion,
         metrics,
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default="configs/u2net/u2net-lite_scratch_1xb16-1k_knc-320x320.yaml",
+        default="configs/dis/isnetdis_scratch_1xb4-1k_knc-1024x1024.yaml",
         type=str,
         help="config file path (default: None)",
     )
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-d",
         "--device",
-        default="mps",
+        default="cuda",
         type=str,
         help="indices of GPUs to enable (default: all)",
     )
@@ -102,7 +102,5 @@ if __name__ == "__main__":
         ),
         CustomArgs(["--ep", "--epochs"], type=int, target="trainer;epochs"),
     ]
-
     config = ConfigParser.from_args(args, options)
-
     main(config)

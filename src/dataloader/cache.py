@@ -6,11 +6,11 @@ from copy import deepcopy
 import json
 from tqdm import tqdm
 import os
-from trainer.dataloader.datasets import ImageProcess
+from src.dataloader.datasets import ImageProcess
 
 import torch
 from collections import defaultdict
-from trainer.dataloader.datasets import KNCDataset
+from src.dataloader.datasets import KNCDataset
 
 
 class KNCCache(KNCDataset):

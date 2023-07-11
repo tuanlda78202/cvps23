@@ -1,7 +1,8 @@
 import logging
+import os
 
-# os.environ["WANDB_SILENT"] = "True"
-# os.environ['WANDB_MODE'] = 'offline'
+os.environ["WANDB_SILENT"] = "False"
+os.environ["WANDB_MODE"] = "online"
 logger = logging.getLogger("wandb")
 logger.setLevel(logging.ERROR)
 logger.setLevel(logging.WARNING)
@@ -9,14 +10,14 @@ logger.setLevel(logging.WARNING)
 import numpy as np
 import torch
 from torchvision.utils import make_grid
-from trainer.base import BaseTrainer
-from trainer.metrics.metric import mae, sm
+from src.base import BaseTrainer
+from src.metrics.metric import *
 from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb
 
 
-class DISTrainer(BaseTrainer):
+class U2NetTrainer(BaseTrainer):
     """
     Trainer class
     """
@@ -79,17 +80,10 @@ class DISTrainer(BaseTrainer):
 
         for batch_idx, loader in enumerate(tqdm_batch):
             # Load to Device
-            if self.device == "cuda:0":
-                data = loader["img"].to(device=self.device)
-                data = data.type(torch.cuda.FloatTensor)
-                mask = loader["mask"].to(device=self.device)
-                mask = mask.type(torch.cuda.FloatTensor)
-
-            else:
-                data = loader["img"].to(device=self.device)
-                data = data.type(torch.FloatTensor)
-                mask = loader["mask"].to(device=self.device)
-                mask = mask.type(torch.FloatTensor)
+            data = loader["img"].to(device=self.device)
+            data = data.type(torch.cuda.FloatTensor)
+            mask = loader["mask"].to(device=self.device)
+            mask = mask.type(torch.cuda.FloatTensor)
 
             self.optimizer.zero_grad()
 
@@ -104,13 +98,13 @@ class DISTrainer(BaseTrainer):
             log_loss = loss.item()
 
             # Metrics, detach tensor auto-grad to numpy
-            if self.device == "cuda:0":
-                map_np, mask_np = (
-                    x_map.cpu().detach().numpy(),
-                    mask.cpu().detach().numpy(),
-                )
-            else:
-                map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
+            map_np, mask_np = (
+                x_map.cpu().detach().numpy(),
+                mask.cpu().detach().numpy(),
+            )
+
+            if self.lr_scheduler is not None:
+                self.lr_scheduler.step()
 
             # Metrics
             # log_maxfm, log_wfm = maxfm(map_np, mask_np), wfm(map_np, mask_np)
@@ -118,8 +112,10 @@ class DISTrainer(BaseTrainer):
             log_mae = mae(map_np, mask_np)
             log_sm = sm(map_np, mask_np)
 
+            lrt = self.lr_scheduler.get_last_lr()[0]
+
             # Progress bar
-            tqdm_batch.set_postfix(loss=log_loss, mae=log_mae, sm=log_sm)
+            tqdm_batch.set_postfix(loss=log_loss, mae=log_mae, sm=log_sm, lr=lrt)
 
             # WandB
             wandb.log({"loss": log_loss, "mae": log_mae, "sm": log_sm})
@@ -151,8 +147,8 @@ class DISTrainer(BaseTrainer):
             val_log = self._valid_epoch(epoch)
             log.update(**{"val_" + k: v for k, v in val_log.items()})
 
-        if self.lr_scheduler is not None:
-            self.lr_scheduler.step()
+        # if self.lr_scheduler is not None:
+        #     self.lr_scheduler.step()
 
         return log
 
@@ -169,30 +165,20 @@ class DISTrainer(BaseTrainer):
         with torch.no_grad():
             for batch_idx, loader in enumerate(self.valid_data_loader):
                 # Load to Device
-                if self.device == "cuda:0":
-                    data = loader["img"].to(device=self.device)
-                    data = data.type(torch.cuda.FloatTensor)
-                    mask = loader["mask"].to(device=self.device)
-                    mask = mask.type(torch.cuda.FloatTensor)
-
-                else:
-                    data = loader["img"].to(device=self.device)
-                    data = data.type(torch.FloatTensor)
-                    mask = loader["mask"].to(device=self.device)
-                    mask = mask.type(torch.FloatTensor)
+                data = loader["img"].to(device=self.device)
+                data = data.type(torch.cuda.FloatTensor)
+                mask = loader["mask"].to(device=self.device)
+                mask = mask.type(torch.cuda.FloatTensor)
 
                 # Forward
                 x_fuse, list_maps = self.model(data)
                 loss = self.criterion(list_maps, mask)
 
                 # Metrics, detach tensor auto-grad to numpy
-                if self.device == "cuda:0":
-                    map_np, mask_np = (
-                        x_fuse.cpu().detach().numpy(),
-                        mask.cpu().detach().numpy(),
-                    )
-                else:
-                    map_np, mask_np = x_fuse.detach().numpy(), mask.detach().numpy()
+                map_np, mask_np = (
+                    x_fuse.cpu().detach().numpy(),
+                    mask.cpu().detach().numpy(),
+                )
 
                 # Logging
                 self.track.set_step(

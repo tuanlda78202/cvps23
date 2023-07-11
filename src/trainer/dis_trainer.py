@@ -1,7 +1,8 @@
 import logging
+import os
 
-# os.environ["WANDB_SILENT"] = "True"
-# os.environ['WANDB_MODE'] = 'offline'
+os.environ["WANDB_SILENT"] = "False"
+os.environ["WANDB_MODE"] = "online"
 logger = logging.getLogger("wandb")
 logger.setLevel(logging.ERROR)
 logger.setLevel(logging.WARNING)
@@ -9,14 +10,15 @@ logger.setLevel(logging.WARNING)
 import numpy as np
 import torch
 from torchvision.utils import make_grid
-from trainer.base import BaseTrainer
-from trainer.metrics.metric import mae, sm
+from src.base import BaseTrainer
+from src.metrics.metric import mae, sm
 from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb
+from src.model import ISNetGTEncoder
 
 
-class U2NetTrainer(BaseTrainer):
+class DISTrainer(BaseTrainer):
     """
     Trainer class
     """
@@ -60,6 +62,15 @@ class U2NetTrainer(BaseTrainer):
             "loss", *[m.__name__ for m in self.metric_ftns], track=self.track
         )
 
+        self.feature_net = ISNetGTEncoder().cuda()
+        if config["gte"]["interm_supervision"] == True:
+            self.feature_net.load_state_dict(
+                torch.load("saved_gte/GTENCODER-gpu_e_0.pth")
+            )
+            self.feature_net.eval()
+            for param in self.feature_net.parameters():
+                param.requires_grad = False
+
     def _train_epoch(self, epoch):
         """
         Training logic for an epoch
@@ -79,38 +90,31 @@ class U2NetTrainer(BaseTrainer):
 
         for batch_idx, loader in enumerate(tqdm_batch):
             # Load to Device
-            if self.device == "cuda:0":
-                data = loader["img"].to(device=self.device)
-                data = data.type(torch.cuda.FloatTensor)
-                mask = loader["mask"].to(device=self.device)
-                mask = mask.type(torch.cuda.FloatTensor)
-
-            else:
-                data = loader["img"].to(device=self.device)
-                data = data.type(torch.FloatTensor)
-                mask = loader["mask"].to(device=self.device)
-                mask = mask.type(torch.FloatTensor)
+            data = loader["img"].to(device=self.device)
+            data = data.type(torch.cuda.FloatTensor)
+            mask = loader["mask"].to(device=self.device)
+            mask = mask.type(torch.cuda.FloatTensor)
 
             self.optimizer.zero_grad()
 
             # x_map for metrics, list_maps for loss
-            x_map, list_maps = self.model(data)
+            x_fuse, list_maps, dfs = self.model(data)
+            _, fs = self.feature_net(mask)
 
-            loss = self.criterion(list_maps, mask)
+            loss = self.criterion(list_maps, mask, dfs, fs)
+
             loss.backward()
+
             self.optimizer.step()
 
             # Variable for logging
             log_loss = loss.item()
 
             # Metrics, detach tensor auto-grad to numpy
-            if self.device == "cuda:0":
-                map_np, mask_np = (
-                    x_map.cpu().detach().numpy(),
-                    mask.cpu().detach().numpy(),
-                )
-            else:
-                map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
+            map_np, mask_np = (
+                x_fuse.cpu().detach().numpy(),
+                mask.cpu().detach().numpy(),
+            )
 
             # Metrics
             # log_maxfm, log_wfm = maxfm(map_np, mask_np), wfm(map_np, mask_np)
@@ -118,11 +122,13 @@ class U2NetTrainer(BaseTrainer):
             log_mae = mae(map_np, mask_np)
             log_sm = sm(map_np, mask_np)
 
+            lrt = self.lr_scheduler.get_last_lr()[0]
+
             # Progress bar
-            tqdm_batch.set_postfix(loss=log_loss, mae=log_mae, sm=log_sm)
+            tqdm_batch.set_postfix(loss=log_loss, mae=log_mae, sm=log_sm, lr=lrt)
 
             # WandB
-            wandb.log({"loss": log_loss, "mae": log_mae, "sm": log_sm})
+            wandb.log({"loss": log_loss, "mae": log_mae, "sm": log_sm, "lr": lrt})
 
             # Logging
             self.track.set_step((epoch - 1) * self.len_epoch + batch_idx)
@@ -138,7 +144,7 @@ class U2NetTrainer(BaseTrainer):
                     )
                 )
 
-            del loss, log_loss, log_mae, log_sm, x_map, list_maps
+            del loss, log_loss, log_mae, log_sm, x_fuse, list_maps
 
             if batch_idx == self.len_epoch:
                 break
@@ -169,30 +175,22 @@ class U2NetTrainer(BaseTrainer):
         with torch.no_grad():
             for batch_idx, loader in enumerate(self.valid_data_loader):
                 # Load to Device
-                if self.device == "cuda:0":
-                    data = loader["img"].to(device=self.device)
-                    data = data.type(torch.cuda.FloatTensor)
-                    mask = loader["mask"].to(device=self.device)
-                    mask = mask.type(torch.cuda.FloatTensor)
-
-                else:
-                    data = loader["img"].to(device=self.device)
-                    data = data.type(torch.FloatTensor)
-                    mask = loader["mask"].to(device=self.device)
-                    mask = mask.type(torch.FloatTensor)
+                data = loader["img"].to(device=self.device)
+                data = data.type(torch.cuda.FloatTensor)
+                mask = loader["mask"].to(device=self.device)
+                mask = mask.type(torch.cuda.FloatTensor)
 
                 # Forward
-                x_fuse, list_maps = self.model(data)
-                loss = self.criterion(list_maps, mask)
+                x_fuse, list_maps, dfs = self.model(data)
+                _, fs = self.feature_net(mask)
+
+                loss = self.criterion(list_maps, mask, dfs, fs)
 
                 # Metrics, detach tensor auto-grad to numpy
-                if self.device == "cuda:0":
-                    map_np, mask_np = (
-                        x_fuse.cpu().detach().numpy(),
-                        mask.cpu().detach().numpy(),
-                    )
-                else:
-                    map_np, mask_np = x_fuse.detach().numpy(), mask.detach().numpy()
+                map_np, mask_np = (
+                    x_fuse.cpu().detach().numpy(),
+                    mask.cpu().detach().numpy(),
+                )
 
                 # Logging
                 self.track.set_step(

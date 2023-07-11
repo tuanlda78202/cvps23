@@ -1,5 +1,5 @@
 # Salient Object Detection for Korean Name Card
-![DIS-R](https://github.com/tuanlda78202/CVP/blob/main/assets/result-dis.png)
+![DIS-R](https://github.com/tuanlda78202/CVP/blob/main/utils/assets/result-dis.png)
 
 This is the source code of the project "Salient Object Detection for Korean Name Card" of the course "Computer Vision" Summer 2023.
 
@@ -58,11 +58,8 @@ cvps23/
     <td colspan="5" style="font-weight:bold;">Salient Object Detection</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/mobilenetv3/README.md">MobileNetV3</a> (ICCV'2019)</td>
     <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/u2net/README.md">U2Net</a> (PR'2020)</td>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/bisenet/README.md">BiSeNet</a> (CVPR'2021)</td>
     <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">DIS</a> (ECCV'2022)</td>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/inspyrenet/README.md">InSPyReNet</a> (ACCV'2022)</td>
   </tr>
 
 </table>
@@ -72,7 +69,7 @@ cvps23/
 Install the required packages:
 
 ```
-pip install -r requirements.txt
+pip install -r utils/requirements.txt
 ```
 <!-- pipreqs for get requirements.txt -->
 
@@ -157,19 +154,19 @@ test:
 Modify the configurations in `.yaml` config files, then run:
 
 ```bash
-python tools/train.py [CONFIG] [RESUME] [DEVICE] [BATCH_SIZE] [EPOCHS]
+python scripts/train_dis.py [CONFIG] [RESUME] [DEVICE] [BATCH_SIZE] [EPOCHS]
 ```
 
 ### Resuming from checkpoints
 You can resume from a previously saved checkpoint by:
 
 ```bash
-sh tools/train.py --resume path/to/the/ckpt
+python scripts/train.py --resume path/to/the/ckpt
 ```
 
 ### Evaluating
 ```bash
-python tools/eval.py
+python scripts/test.py
 ```
 
 ### Inference 
