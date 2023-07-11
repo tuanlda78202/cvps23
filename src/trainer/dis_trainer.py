@@ -15,6 +15,7 @@ from src.metrics.metric import mae, sm
 from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb
+from src.model import ISNetGTEncoder
 
 
 class DISTrainer(BaseTrainer):
@@ -61,6 +62,15 @@ class DISTrainer(BaseTrainer):
             "loss", *[m.__name__ for m in self.metric_ftns], track=self.track
         )
 
+        self.feature_net = ISNetGTEncoder().cuda()
+        if config["gte"]["interm_supervision"] == True:
+            self.feature_net.load_state_dict(
+                torch.load("saved_gte/GTENCODER-gpu_e_0.pth")
+            )
+            self.feature_net.eval()
+            for param in self.feature_net.parameters():
+                param.requires_grad = False
+
     def _train_epoch(self, epoch):
         """
         Training logic for an epoch
@@ -88,10 +98,13 @@ class DISTrainer(BaseTrainer):
             self.optimizer.zero_grad()
 
             # x_map for metrics, list_maps for loss
-            x_map, list_maps = self.model(data)
+            x_fuse, list_maps, dfs = self.model(data)
+            _, fs = self.feature_net(mask)
 
-            loss = self.criterion(list_maps, mask)
+            loss = self.criterion(list_maps, mask, dfs, fs)
+
             loss.backward()
+
             self.optimizer.step()
 
             # Variable for logging
@@ -99,7 +112,7 @@ class DISTrainer(BaseTrainer):
 
             # Metrics, detach tensor auto-grad to numpy
             map_np, mask_np = (
-                x_map.cpu().detach().numpy(),
+                x_fuse.cpu().detach().numpy(),
                 mask.cpu().detach().numpy(),
             )
 
@@ -109,11 +122,13 @@ class DISTrainer(BaseTrainer):
             log_mae = mae(map_np, mask_np)
             log_sm = sm(map_np, mask_np)
 
+            lrt = self.lr_scheduler.get_last_lr()[0]
+
             # Progress bar
-            tqdm_batch.set_postfix(loss=log_loss, mae=log_mae, sm=log_sm)
+            tqdm_batch.set_postfix(loss=log_loss, mae=log_mae, sm=log_sm, lr=lrt)
 
             # WandB
-            wandb.log({"loss": log_loss, "mae": log_mae, "sm": log_sm})
+            wandb.log({"loss": log_loss, "mae": log_mae, "sm": log_sm, "lr": lrt})
 
             # Logging
             self.track.set_step((epoch - 1) * self.len_epoch + batch_idx)
@@ -129,7 +144,7 @@ class DISTrainer(BaseTrainer):
                     )
                 )
 
-            del loss, log_loss, log_mae, log_sm, x_map, list_maps
+            del loss, log_loss, log_mae, log_sm, x_fuse, list_maps
 
             if batch_idx == self.len_epoch:
                 break
@@ -166,8 +181,10 @@ class DISTrainer(BaseTrainer):
                 mask = mask.type(torch.cuda.FloatTensor)
 
                 # Forward
-                x_fuse, list_maps = self.model(data)
-                loss = self.criterion(list_maps, mask)
+                x_fuse, list_maps, dfs = self.model(data)
+                _, fs = self.feature_net(mask)
+
+                loss = self.criterion(list_maps, mask, dfs, fs)
 
                 # Metrics, detach tensor auto-grad to numpy
                 map_np, mask_np = (

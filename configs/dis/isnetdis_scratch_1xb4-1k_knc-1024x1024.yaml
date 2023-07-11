@@ -12,7 +12,7 @@ gte:
   seed: 0
   gt_encoder_model: ""
 
-  model_path: "../saved_gte/"
+  model_path: "saved_gte/"
   model_save_fre: 2000
   max_ite: 10000000
 
@@ -28,14 +28,14 @@ data_loader:
   type: KNCDataLoader
   args:
 
-    batch_size: 12
+    batch_size: 12 # 32 for training gte
     shuffle: true
     num_workers: 4
     validation_split: 0.1
     output_size: 400
     crop_size: 384
 
-    dir: "../split_dataset/train"
+    dir: "data_demo" # "../split_dataset/train"
 
 optimizer:
   type: Adam
@@ -47,17 +47,17 @@ optimizer:
       - 0.9
       - 0.999
 
-loss: multi_bce_fusion
+loss: multi_mse_fusion
 
 metrics:
   - mae
   - sm
 
 lr_scheduler:
-  type: StepLR
+  type: CosineAnnealingLR
   args:
-    step_size: 50
-    gamma: 0.1
+    T_max: 14000
+    eta_min: 0.000001
 
 trainer:
   type: Trainer

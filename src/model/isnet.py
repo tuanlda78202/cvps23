@@ -36,17 +36,7 @@ def muti_loss_fusion_kl(preds, target, dfs, fs, mode="MSE"):
     loss = 0.0
 
     for i in range(0, len(preds)):
-        # print("i: ", i, preds[i].shape)
-        if preds[i].shape[2] != target.shape[2] or preds[i].shape[3] != target.shape[3]:
-            # tmp_target = _upsample_like(target,preds[i])
-            tmp_target = F.interpolate(
-                target, size=preds[i].size()[2:], mode="bilinear", align_corners=True
-            )
-            loss = loss + bce_loss(preds[i], tmp_target)
-        else:
-            loss = loss + bce_loss(preds[i], target)
-        if i == 0:
-            loss0 = loss
+        loss = loss + bce_loss(preds[i], target)
 
     for i in range(0, len(dfs)):
         if mode == "MSE":
@@ -64,7 +54,7 @@ def muti_loss_fusion_kl(preds, target, dfs, fs, mode="MSE"):
             loss = loss + smooth_l1_loss(dfs[i], fs[i])
             # print("SmoothL1: ", smooth_l1_loss(dfs[i],fs[i]).item())
 
-    return loss0, loss
+    return loss
 
 
 # RELu + BatchNorm + DPConv
@@ -678,7 +668,12 @@ class ISNetDIS(nn.Module):
                 F.sigmoid(d5),
                 F.sigmoid(d6),
             ],
+            [hx1d, hx2d, hx3d, hx4d, hx5d, hx6],
         )
+
+    def compute_loss_kl(self, preds, targets, dfs, fs, mode="MSE"):
+        # return muti_loss_fusion(preds,targets)
+        return muti_loss_fusion_kl(preds, targets, dfs, fs, mode=mode)
 
 
 from torchsummary import summary

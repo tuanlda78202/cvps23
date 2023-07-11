@@ -2,6 +2,7 @@
 import sys, os
 
 sys.path.append(os.getcwd())
+from tqdm import tqdm
 
 import time
 import numpy as np
@@ -80,7 +81,14 @@ def train_gte(
     notgood_cnt = 0
 
     for epoch in range(epoch_num):  ## set the epoch num as 100000
-        for i, data in enumerate(train_dataloaders):
+        tqdm_batch = tqdm(
+            iterable=train_dataloaders,
+            desc="Epoch {}".format(epoch),
+            total=len(train_dataloaders),
+            unit="it",
+        )
+
+        for i, data in enumerate(tqdm_batch):
             if ite_num >= max_ite:
                 print("Training Reached the Maximal Iteration Number ", max_ite)
                 exit()
@@ -112,13 +120,13 @@ def train_gte(
             loss.backward()
             optimizer.step()
 
-            running_loss += loss.item()
-            running_tar_loss += loss2.item()
+            tqdm_batch.set_postfix(loss=loss.item(), tar_loss=loss2.item())
 
             # del outputs, loss
             del ds, loss2, loss
             # end_inf_loss_back = time.time() - start_inf_loss_back
 
+            """
             print(
                 "GT Encoder Training>>>"
                 + model_path.split("/")[-1]
@@ -131,10 +139,13 @@ def train_gte(
                     running_tar_loss / ite_num4val,
                 )
             )
+            """
 
         model_name = "/GTENCODER-gpu_e_" + str(epoch) + ".pth"
 
         torch.save(net.state_dict(), model_path + model_name)
+
+        print("saving ckpt gte")
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 bce_loss = nn.BCELoss(reduction="mean")
-feat_loss = nn.MSELoss(reduction=True)
+feat_loss = nn.MSELoss(size_average=True)
 
 
 # U2Net
