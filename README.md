@@ -1,5 +1,5 @@
 # Salient Object Detection for Korean Name Card
-![DIS-R](https://github.com/tuanlda78202/CVP/blob/main/utils/assets/result-dis.png)
+![DIS-R](https://github.com/tuanlda78202/CVP/blob/main/assets/result-dis.png)
 
 This is the source code of the project "Salient Object Detection for Korean Name Card" of the course "Computer Vision" Summer 2023.
 
